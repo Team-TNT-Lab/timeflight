@@ -15,7 +15,7 @@ class NFCManager: NSObject, ObservableObject, NFCNDEFReaderSessionDelegate {
 
     func startNFCScan(alertMessage: String, completion: @escaping (String?) -> Void) {
         guard NFCNDEFReaderSession.readingAvailable else {
-            nfcMessage = nfcError.deviceNotSupported.localizedDescription
+            nfcMessage = NfcError.deviceNotSupported.localizedDescription
             return
         }
 
@@ -34,12 +34,12 @@ class NFCManager: NSObject, ObservableObject, NFCNDEFReaderSessionDelegate {
               let record = message.records.first
         else {
             DispatchQueue.main.async {
-                self.nfcMessage = nfcError.invalidMessage.localizedDescription
+                self.nfcMessage = NfcError.invalidMessage.localizedDescription
             }
             return
         }
 
-        let messageText = String(data: record.payload, encoding: .utf8) ?? nfcError.invalidMessage.localizedDescription
+        let messageText = String(data: record.payload, encoding: .utf8) ?? NfcError.invalidMessage.localizedDescription
         DispatchQueue.main.async {
             self.nfcMessage = messageText
             if messageText == "\u{02}enwake" {
@@ -51,9 +51,9 @@ class NFCManager: NSObject, ObservableObject, NFCNDEFReaderSessionDelegate {
 
     func readerSession(_ session: NFCNDEFReaderSession, didInvalidateWithError error: Error) {
         DispatchQueue.main.async {
-            if let nfcError = error as? NFCReaderError {
-                if nfcError.code != .readerSessionInvalidationErrorUserCanceled {
-                    self.nfcMessage = nfcError.localizedDescription
+            if let NfcError = error as? NFCReaderError {
+                if NfcError.code != .readerSessionInvalidationErrorUserCanceled {
+                    self.nfcMessage = NfcError.localizedDescription
                 } else {
                     self.nfcMessage = "스캔취소"
                 }

@@ -9,7 +9,7 @@ enum AuthError: Error {
     case requestFailed
 }
 
-enum nfcError: Error {
+enum NfcError: Error {
     case deviceNotSupported
     case scanFailed
     case invalidMessage
