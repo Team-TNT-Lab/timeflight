@@ -11,7 +11,7 @@ import SwiftUI
 
 class ScreenTimeManager: ObservableObject {
     @Published var selection = FamilyActivitySelection()
-    let store = ManagedSettingsStore()
+    private let store = ManagedSettingsStore()
 
     func lockApps() {
         store.shield.applicationCategories = .specific(selection.categoryTokens)

@@ -1,19 +1,19 @@
 //
-//  NFCManager.swift
+//  NFCScanManager.swift
 //  timeflight
 //
 //  Created by bishoe01 on 9/19/25.
 //
 
-
 import CoreNFC
 import SwiftUI
+
 class NFCManager: ObservableObject {
     @Published var nfcMessage: String = "NFC대기"
     private var nfcSession: NFCNDEFReaderSession?
     private var nfcDelegate: TimerViewNFCDelegate?
 
-    func startNFCScanning() {
+    func startNFCScanning(completion: @escaping (String?) -> Void) {
         guard NFCNDEFReaderSession.readingAvailable else {
             nfcMessage = nfcError.deviceNotSupported.localizedDescription
             return
@@ -22,6 +22,9 @@ class NFCManager: ObservableObject {
         nfcDelegate = TimerViewNFCDelegate { message in
             DispatchQueue.main.async {
                 self.nfcMessage = message
+                if message == "\u{02}enwake" {
+                    completion(message)
+                }
             }
         }
 

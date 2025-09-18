@@ -5,8 +5,6 @@
 //  Created by bishoe01 on 9/18/25.
 //
 
-import FamilyControls
-import ManagedSettings
 import SwiftUI
 
 struct ContentView: View {
@@ -16,20 +14,24 @@ struct ContentView: View {
     @State var isPickerPresented = false
 
     @StateObject private var screenTimeManager = ScreenTimeManager()
-
+    @StateObject private var nfcScanManager = NFCManager()
     var body: some View {
-        VStack {
-            Text("TIME FLIGHT")
+        VStack(spacing: 14) {
+            Text("Dream Air").font(.system(size: 24))
 
             Button("Open Picker") {
                 isPickerPresented.toggle()
             }.familyActivityPicker(isPresented: $isPickerPresented, selection: $screenTimeManager.selection)
 
-            Button("HIHI") {
-                screenTimeManager.lockApps()
+            Button("잠그기") {
+                nfcScanManager.startNFCScanning { _ in
+                    screenTimeManager.lockApps()
+                }
             }
             Button("해제하기") {
-                screenTimeManager.unlockApps()
+                nfcScanManager.startNFCScanning { _ in
+                    screenTimeManager.unlockApps()
+                }
             }
             Button("이동") {
                 coordinator.push(.timerView)
