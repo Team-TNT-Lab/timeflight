@@ -36,7 +36,7 @@ class AuthorizationManager: ObservableObject {
                 checkAuthorizationStatus()
                 print("권한 요청 완료")
             } catch {
-                print("권한 요청 실패: \(error)")
+                throw AuthError.requestFailed
             }
         }
     }
