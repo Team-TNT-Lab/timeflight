@@ -14,3 +14,8 @@ enum NfcError: Error {
     case scanFailed
     case invalidMessage
 }
+
+enum TimeRangeError: Error {
+    case invalidTimeRange
+    case endBeforeStart
+}
