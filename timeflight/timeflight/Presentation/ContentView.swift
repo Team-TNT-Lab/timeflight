@@ -28,14 +28,6 @@ struct ContentView: View {
                     screenTimeManager.lockApps()
                 }
             }
-            Button("해제하기") {
-                nfcScanManager.startNFCScan(alertMessage: "긴급탈출하려면 태그하세요") { _ in
-                    screenTimeManager.unlockApps()
-                }
-            }
-            Button("이동") {
-                coordinator.push(.timerView)
-            }
 
         }.task {
             if !authManager.isAuthorized {
