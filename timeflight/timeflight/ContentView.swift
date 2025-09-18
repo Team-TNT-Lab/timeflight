@@ -25,10 +25,9 @@ struct ContentView: View {
 
         FamilyActivityPicker(selection: $selection)
         Button("HI") {
-//            print(selection.applicationTokens.count)
             print(selection.categories.count)
-            print(selection.applicationTokens ?? "NIL")
-            store.shield.applications = selection.applicationTokens
+            store.shield.applicationCategories = .specific(selection.categoryTokens)
+            store.shield.webDomains = selection.webDomainTokens
         }
     }
 }
