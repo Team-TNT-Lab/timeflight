@@ -12,6 +12,7 @@ import SwiftUI
 struct ContentView: View {
     @State var selection = FamilyActivitySelection()
     @EnvironmentObject var authManager: AuthorizationManager
+    @EnvironmentObject private var coordinator: Coordinator
     @State var isPickerPresented = false
 
     let store = ManagedSettingsStore()
@@ -25,6 +26,9 @@ struct ContentView: View {
             }.familyActivityPicker(isPresented: $isPickerPresented, selection: $selection).onChange(of: selection) {
                 store.shield.applicationCategories = .specific(selection.categoryTokens)
                 store.shield.webDomains = selection.webDomainTokens
+            }
+            Button("이동") {
+                coordinator.push(.timerView)
             }
 
         }.task {
