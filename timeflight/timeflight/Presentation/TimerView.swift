@@ -5,14 +5,18 @@
 //  Created by bishoe01 on 9/18/25.
 //
 
+import CoreNFC
 import SwiftUI
 
 struct TimerView: View {
+    @StateObject private var nfcScanManager = NFCManager()
     var body: some View {
-        Text("Timer View")
-    }
-}
+        VStack {
+            Text(nfcScanManager.nfcMessage)
 
-#Preview {
-    TimerView()
+            Button("스캔") {
+                nfcScanManager.startNFCScanning()
+            }
+        }
+    }
 }

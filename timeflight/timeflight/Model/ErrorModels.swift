@@ -8,3 +8,9 @@
 enum AuthError: Error {
     case requestFailed
 }
+
+enum nfcError: Error {
+    case deviceNotSupported
+    case scanFailed
+    case invalidMessage
+}
