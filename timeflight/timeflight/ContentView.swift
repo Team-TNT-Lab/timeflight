@@ -12,22 +12,25 @@ import SwiftUI
 struct ContentView: View {
     @State var selection = FamilyActivitySelection()
     @EnvironmentObject var authManager: AuthorizationManager
+    @State var isPickerPresented = false
 
     let store = ManagedSettingsStore()
 
     var body: some View {
-        Text("TIME FLIGHT")
-        Button("AUTH") {
+        VStack {
+            Text("TIME FLIGHT")
+
+            Button("Open Picker") {
+                isPickerPresented.toggle()
+            }.familyActivityPicker(isPresented: $isPickerPresented, selection: $selection).onChange(of: selection) {
+                store.shield.applicationCategories = .specific(selection.categoryTokens)
+                store.shield.webDomains = selection.webDomainTokens
+            }
+
+        }.task {
             if !authManager.isAuthorized {
                 authManager.requestAuthorization()
             }
-        }
-
-        FamilyActivityPicker(selection: $selection)
-        Button("HI") {
-            print(selection.categories.count)
-            store.shield.applicationCategories = .specific(selection.categoryTokens)
-            store.shield.webDomains = selection.webDomainTokens
         }
     }
 }
