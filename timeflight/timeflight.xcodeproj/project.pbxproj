@@ -16,11 +16,6 @@
 			path = timeflight;
 			sourceTree = "<group>";
 		};
-		7DCC168B2E7C3E2B00499E59 /* Manager */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Manager;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,7 +34,6 @@
 			children = (
 				7DCC163C2E7C30E700499E59 /* timeflight */,
 				7DCC163B2E7C30E700499E59 /* Products */,
-				7DCC168B2E7C3E2B00499E59 /* Manager */,
 			);
 			sourceTree = "<group>";
 		};
@@ -68,7 +62,6 @@
 			);
 			fileSystemSynchronizedGroups = (
 				7DCC163C2E7C30E700499E59 /* timeflight */,
-				7DCC168B2E7C3E2B00499E59 /* Manager */,
 			);
 			name = timeflight;
 			packageProductDependencies = (
