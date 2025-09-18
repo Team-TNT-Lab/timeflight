@@ -24,12 +24,12 @@ struct ContentView: View {
             }.familyActivityPicker(isPresented: $isPickerPresented, selection: $screenTimeManager.selection)
 
             Button("잠그기") {
-                nfcScanManager.startNFCScanning { _ in
+                nfcScanManager.startNFCScan(alertMessage: "항공권 스캔을 시작합니다") { _ in
                     screenTimeManager.lockApps()
                 }
             }
             Button("해제하기") {
-                nfcScanManager.startNFCScanning { _ in
+                nfcScanManager.startNFCScan(alertMessage: "긴급탈출하려면 태그하세요") { _ in
                     screenTimeManager.unlockApps()
                 }
             }
