@@ -25,7 +25,6 @@ class AuthorizationManager: ObservableObject {
             let status = authorizationCenter.authorizationStatus
             self.isAuthorized = status == .approved
             self.isLoading = false
-            print("현재 권한 상태: \(status.rawValue)")
         }
     }
     
@@ -34,7 +33,6 @@ class AuthorizationManager: ObservableObject {
             do {
                 try await authorizationCenter.requestAuthorization(for: .individual)
                 checkAuthorizationStatus()
-                print("권한 요청 완료")
             } catch {
                 throw AuthError.requestFailed
             }
