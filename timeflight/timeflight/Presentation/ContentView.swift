@@ -10,12 +10,12 @@ import ManagedSettings
 import SwiftUI
 
 struct ContentView: View {
-    @State var selection = FamilyActivitySelection()
     @EnvironmentObject var authManager: AuthorizationManager
     @EnvironmentObject private var coordinator: Coordinator
+
     @State var isPickerPresented = false
 
-    let store = ManagedSettingsStore()
+    @StateObject private var screenTimeManager = ScreenTimeManager()
 
     var body: some View {
         VStack {
@@ -23,9 +23,13 @@ struct ContentView: View {
 
             Button("Open Picker") {
                 isPickerPresented.toggle()
-            }.familyActivityPicker(isPresented: $isPickerPresented, selection: $selection).onChange(of: selection) {
-                store.shield.applicationCategories = .specific(selection.categoryTokens)
-                store.shield.webDomains = selection.webDomainTokens
+            }.familyActivityPicker(isPresented: $isPickerPresented, selection: $screenTimeManager.selection)
+
+            Button("HIHI") {
+                screenTimeManager.lockApps()
+            }
+            Button("해제하기") {
+                screenTimeManager.unlockApps()
             }
             Button("이동") {
                 coordinator.push(.timerView)
