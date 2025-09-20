@@ -16,7 +16,7 @@ struct SettingView: View {
                         NavigationLink {
                             switch idx {
                             case 0: AppLockSettingView()
-                            default: Text("3")
+                            default: TimeSettingView()
                             }
 
                         } label: {

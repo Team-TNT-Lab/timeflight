@@ -11,5 +11,5 @@ enum ViewConstants {
             "접근 앱",
             "수면시간 설정",
         ]
-    }
+     }
 }
