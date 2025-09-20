@@ -15,7 +15,7 @@ struct timeflightApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $coordinator.path) {
-                ContentView()
+                HomeView()
                     .navigationDestination(for: Path.self) { path in
                         switch path {
                         case .timerView:
