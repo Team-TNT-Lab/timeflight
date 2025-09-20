@@ -9,14 +9,8 @@ import FamilyControls
 import SwiftUI
 
 struct AppLockSettingView: View {
-    @EnvironmentObject var authManager: AuthorizationManager
-    @StateObject private var screenTimeManager = ScreenTimeManager()
+    @EnvironmentObject var screenTimeManager: ScreenTimeManager
     var body: some View {
         FamilyActivityPicker(selection: $screenTimeManager.selection)
-            .task {
-                if !authManager.isAuthorized {
-                    authManager.requestAuthorization()
-                }
-            }
     }
 }

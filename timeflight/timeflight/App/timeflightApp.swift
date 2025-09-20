@@ -11,6 +11,7 @@ import SwiftUI
 struct timeflightApp: App {
     @StateObject private var coordinator = Coordinator()
     @StateObject private var authManager = AuthorizationManager()
+    @StateObject private var screenTimeManager = ScreenTimeManager()
 
     var body: some Scene {
         WindowGroup {
@@ -23,7 +24,8 @@ struct timeflightApp: App {
                         }
                     }
             }
-        }.environmentObject(coordinator)
-            .environmentObject(authManager)
+        }.environmentObject(authManager)
+            .environmentObject(screenTimeManager)
+//            .environmentObject(coordinator)
     }
 }
