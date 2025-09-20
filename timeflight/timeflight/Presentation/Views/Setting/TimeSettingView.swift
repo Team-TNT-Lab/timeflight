@@ -11,6 +11,8 @@ import SwiftUI
 // 2. 평일 세팅
 // 3. 주말 세팅
 struct TimeSettingView: View {
+    @StateObject private var viewModel = TimeSettingViewModel()
+
     var body: some View {
         VStack {
             Text("평일 수면 시간을 설정해주세요")
@@ -20,17 +22,50 @@ struct TimeSettingView: View {
 
             Spacer()
 
-            Button("다음") {
-                print("E")
+            VStack(spacing: 10) {
+                // 변경예정
+                Text("월 화 수 목 금")
+                    .font(.system(size: 16))
+
+                Spacer().frame(height: 16)
+                HStack(alignment: .center, spacing: 16) {
+                    Button(action: { viewModel.showingStartPicker = true }) {
+                        TimeField(date: viewModel.startDate)
+                    }
+                    // 변경예정
+                    Text("–")
+                        .font(.system(size: 24, weight: .semibold))
+
+                    Button(action: { viewModel.showingEndPicker = true }) {
+                        TimeField(date: viewModel.endDate)
+                    }
+                }
+
+                Text(viewModel.sleepHoursText)
+                    .font(.system(size: 16))
+                    .opacity(0.4)
             }
-            .font(.system(size: 20))
-            .foregroundColor(Color.black)
-            .frame(height: 54)
-            .frame(maxWidth: .infinity)
-            .background(Color.gray)
-            .cornerRadius(15)
+
+            Spacer()
+            Button(action: {
+                print("E")
+            }) {
+                Text("다음")
+                    .font(.system(size: 20))
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 54)
+                    .background(Color.gray)
+                    .foregroundColor(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 15))
+            }
         }
         .padding(.all, 20)
+        .sheet(isPresented: $viewModel.showingStartPicker) {
+            TimePickerSheet(date: $viewModel.startDate, isPresented: $viewModel.showingStartPicker)
+        }
+        .sheet(isPresented: $viewModel.showingEndPicker) {
+            TimePickerSheet(date: $viewModel.endDate, isPresented: $viewModel.showingEndPicker)
+        }
     }
 }
 
