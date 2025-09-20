@@ -17,12 +17,12 @@ struct timeflightApp: App {
         WindowGroup {
             NavigationStack(path: $coordinator.path) {
                 HomeView()
-                    .navigationDestination(for: Path.self) { path in
-                        switch path {
-                        case .timerView:
-                            TimerView()
-                        }
-                    }
+//                    .navigationDestination(for: Path.self) { path in
+//                        switch path {
+//                        case .timerView:
+//                            TimerView()
+//                        }
+//                    }
             }
         }.environmentObject(authManager)
             .environmentObject(screenTimeManager)
