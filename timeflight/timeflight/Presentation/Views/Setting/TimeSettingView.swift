@@ -33,9 +33,9 @@ struct TimeSettingView: View {
 
             Spacer()
             Button(action: {
-                print("E")
+                print(" 설정완료")
             }) {
-                Text("다음")
+                Text("완료")
                     .font(.system(size: 20))
                     .frame(maxWidth: .infinity)
                     .frame(height: 54)
@@ -65,4 +65,3 @@ struct TimeSettingView: View {
 #Preview {
     TimeSettingView()
 }
-
