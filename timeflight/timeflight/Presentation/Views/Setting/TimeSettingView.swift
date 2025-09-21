@@ -46,10 +46,18 @@ struct TimeSettingView: View {
         }
         .padding(.all, 20)
         .sheet(isPresented: $viewModel.showingStartPicker) {
-            TimePickerSheet(date: $viewModel.startDate, isPresented: $viewModel.showingStartPicker)
+            TimePickerSheetWrapper(
+                isPresented: $viewModel.showingStartPicker,
+                date: viewModel.startDate,
+                setDate: viewModel.setStartDate(_:)
+            )
         }
         .sheet(isPresented: $viewModel.showingEndPicker) {
-            TimePickerSheet(date: $viewModel.endDate, isPresented: $viewModel.showingEndPicker)
+            TimePickerSheetWrapper(
+                isPresented: $viewModel.showingEndPicker,
+                date: viewModel.endDate,
+                setDate: viewModel.setEndDate(_:)
+            )
         }
     }
 }
@@ -57,3 +65,4 @@ struct TimeSettingView: View {
 #Preview {
     TimeSettingView()
 }
+

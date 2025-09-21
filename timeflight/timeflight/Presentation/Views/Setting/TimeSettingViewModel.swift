@@ -21,6 +21,20 @@ final class TimeSettingViewModel: ObservableObject {
         self.endDate = endDate
     }
 
+    func setStartDate(_ newStart: Date) {
+        startDate = newStart
+        if endDate <= startDate {
+            endDate = Calendar.current.date(byAdding: .day, value: 1, to: startDate) ?? startDate.addingTimeInterval(24*60*60)
+        }
+    }
+
+    func setEndDate(_ newEnd: Date) {
+        endDate = newEnd
+        if endDate <= startDate {
+            endDate = Calendar.current.date(byAdding: .day, value: 1, to: startDate) ?? startDate.addingTimeInterval(24*60*60)
+        }
+    }
+
     var sleepHoursText: String {
         let comps = Calendar.current.dateComponents([.minute], from: startDate, to: endDate)
         let minutes = (comps.minute ?? 0 + 24*60) % (24*60)

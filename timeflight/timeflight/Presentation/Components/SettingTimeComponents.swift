@@ -40,3 +40,17 @@ struct TimePickerSheet: View {
         .presentationDragIndicator(.visible)
     }
 }
+
+struct TimePickerSheetWrapper: View {
+    let isPresented: Binding<Bool>
+    let date: Date
+    let setDate: (Date) -> Void
+
+    var body: some View {
+        let binding = Binding<Date>(
+            get: { date },
+            set: { setDate($0) }
+        )
+        TimePickerSheet(date: binding, isPresented: isPresented)
+    }
+}
