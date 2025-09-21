@@ -24,8 +24,8 @@ struct FlightView: View {
                     .font(.system(size: 18))
                     .opacity(0.4)
                 Spacer().frame(height: 18)
-                Button(viewModel.isSleepModeActive ? "비행 종료" : "비행 시작") {
-                    if viewModel.isSleepModeActive {
+                Button(viewModel.isSleeping ? "비행 종료" : "비행 시작") {
+                    if viewModel.isSleeping {
                         viewModel.stopSleep()
                     } else {
                         viewModel.startSleep()

@@ -9,14 +9,14 @@ import Foundation
 import SwiftUI
 
 final class FlightViewModel: ObservableObject {
-    @Published var isSleepModeActive: Bool = false
+    @Published var isSleeping: Bool = false
 
     func startSleep() {
-        isSleepModeActive = true
+        isSleeping = true
     }
 
     func stopSleep() {
-        isSleepModeActive = false
+        isSleeping = false
     }
 
     func calculateTimeUntilSleep() -> String {
@@ -27,24 +27,24 @@ final class FlightViewModel: ObservableObject {
         let (sleepStart, sleepEnd) = schedule.getTodaySchedule()
         let now = Date()
 
-        if isSleepModeActive {
+        if isSleeping {
             // 수면시작했는지(NFC태그여부)
             if now <= sleepEnd {
                 return "현재 수면 중"
             } else {
-                // 수면 시간이후 자동으로 수면 모드 종료(notification로직필요)
-                isSleepModeActive = false
+                // 수면 시간이후 자동으로 수면모드 종료(notification로직필요할듯-논의필요)
+                isSleeping = false
                 return "수면이 완료되었습니다"
             }
         } else {
             // 수면을시작하지않았을때(태그하지않음)
             if now >= sleepStart {
                 let timeElapsed = now.timeIntervalSince(sleepStart)
-                return formatOverdueTime(timeElapsed)
+                return formatDelay(timeElapsed)
             } else {
                 // 수면시작시간 전일때
                 let timeInterval = sleepStart.timeIntervalSince(now)
-                return formatTimeInterval(timeInterval)
+                return formatInterval(timeInterval)
             }
         }
     }
@@ -69,26 +69,26 @@ final class FlightViewModel: ObservableObject {
             return "\(formatter.string(from: sleepStart))에 수면시작"
         }
     }
+}
 
-    private func formatTimeInterval(_ interval: TimeInterval) -> String {
-        let hours = Int(interval) / 3600
-        let minutes = Int(interval) % 3600 / 60
+private func formatInterval(_ interval: TimeInterval) -> String {
+    let hours = Int(interval) / 3600
+    let minutes = Int(interval) % 3600 / 60
 
-        if hours > 0 {
-            return "비행까지 \(hours)시간 \(minutes)분 남았어요"
-        } else {
-            return "비행까지 \(minutes)분 남았어요"
-        }
+    if hours > 0 {
+        return "비행까지 \(hours)시간 \(minutes)분 남았어요"
+    } else {
+        return "비행까지 \(minutes)분 남았어요"
     }
+}
 
-    private func formatOverdueTime(_ interval: TimeInterval) -> String {
-        let hours = Int(interval) / 3600
-        let minutes = Int(interval) % 3600 / 60
+private func formatDelay(_ interval: TimeInterval) -> String {
+    let hours = Int(interval) / 3600
+    let minutes = Int(interval) % 3600 / 60
 
-        if hours > 0 {
-            return "수면 시간에서 \(hours)시간 \(minutes)분 지연"
-        } else {
-            return "수면 시간에서 \(minutes)분 지연"
-        }
+    if hours > 0 {
+        return "수면 시간에서 \(hours)시간 \(minutes)분 지연"
+    } else {
+        return "수면 시간에서 \(minutes)분 지연"
     }
 }
