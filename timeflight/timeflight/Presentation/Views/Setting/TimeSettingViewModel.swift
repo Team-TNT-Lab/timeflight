@@ -19,8 +19,11 @@ final class TimeSettingViewModel: ObservableObject {
             self.startDate = savedSchedule.startTime
             self.endDate = savedSchedule.endTime
         } else {
-            self.startDate = Calendar.current.startOfDay(for: Date())
-            self.endDate = Calendar.current.date(bySettingHour: 8, minute: 0, second: 0, of: Date()) ?? Date()
+            // 초기세팅 23시~07시
+            let calendar = Calendar.current
+            let today = calendar.startOfDay(for: Date())
+            self.startDate = calendar.date(bySettingHour: 23, minute: 0, second: 0, of: today) ?? Date()
+            self.endDate = calendar.date(bySettingHour: 7, minute: 0, second: 0, of: today) ?? Date()
         }
     }
 
@@ -33,9 +36,16 @@ final class TimeSettingViewModel: ObservableObject {
     }
 
     func saveSchedule() {
+        let calendar = Calendar.current
+        let startComponents = calendar.dateComponents([.hour, .minute], from: startDate)
+        let endComponents = calendar.dateComponents([.hour, .minute], from: endDate)
+
         let schedule = SleepSchedule(
-            startTime: normalizedStartDate,
-            endTime: normalizedEndDate
+            startHour: startComponents.hour ?? 23,
+            startMinute: startComponents.minute ?? 0,
+            endHour: endComponents.hour ?? 7,
+            endMinute: endComponents.minute ?? 0,
+            isEnabled: true
         )
         SleepScheduleStorage.save(schedule: schedule)
     }
