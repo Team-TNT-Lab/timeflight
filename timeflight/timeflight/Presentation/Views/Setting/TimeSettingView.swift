@@ -33,7 +33,8 @@ struct TimeSettingView: View {
 
             Spacer()
             Button(action: {
-                print(" 설정완료")
+                viewModel.saveSchedule()
+                print("저장 완료")
             }) {
                 Text("완료")
                     .font(.system(size: 20))

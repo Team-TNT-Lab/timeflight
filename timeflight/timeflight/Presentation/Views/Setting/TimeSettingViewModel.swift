@@ -13,12 +13,15 @@ final class TimeSettingViewModel: ObservableObject {
     @Published var showingStartPicker: Bool = false
     @Published var showingEndPicker: Bool = false
 
-    init(
-        startDate: Date = Calendar.current.startOfDay(for: Date()),
-        endDate: Date = Calendar.current.date(bySettingHour: 8, minute: 0, second: 0, of: Date()) ?? Date()
-    ) {
-        self.startDate = startDate
-        self.endDate = endDate
+    init() {
+        // userdefaults에서 가져오면서 저장된스케줄있는지확인
+        if let savedSchedule = SleepScheduleStorage.load() {
+            self.startDate = savedSchedule.startTime
+            self.endDate = savedSchedule.endTime
+        } else {
+            self.startDate = Calendar.current.startOfDay(for: Date())
+            self.endDate = Calendar.current.date(bySettingHour: 8, minute: 0, second: 0, of: Date()) ?? Date()
+        }
     }
 
     func setStartDate(_ newStart: Date) {
@@ -27,6 +30,14 @@ final class TimeSettingViewModel: ObservableObject {
 
     func setEndDate(_ newEnd: Date) {
         endDate = newEnd
+    }
+
+    func saveSchedule() {
+        let schedule = SleepSchedule(
+            startTime: normalizedStartDate,
+            endTime: normalizedEndDate
+        )
+        SleepScheduleStorage.save(schedule: schedule)
     }
 
     var sleepHoursText: String {
