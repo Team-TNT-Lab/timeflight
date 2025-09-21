@@ -22,29 +22,14 @@ struct TimeSettingView: View {
 
             Spacer()
 
-            VStack(spacing: 10) {
-                // 변경예정
-                Text("월 화 수 목 금")
-                    .font(.system(size: 16))
-
-                Spacer().frame(height: 16)
-                HStack(alignment: .center, spacing: 16) {
-                    Button(action: { viewModel.showingStartPicker = true }) {
-                        TimeField(date: viewModel.startDate)
-                    }
-                    // 변경예정
-                    Text("–")
-                        .font(.system(size: 24, weight: .semibold))
-
-                    Button(action: { viewModel.showingEndPicker = true }) {
-                        TimeField(date: viewModel.endDate)
-                    }
-                }
-
-                Text(viewModel.sleepHoursText)
-                    .font(.system(size: 16))
-                    .opacity(0.4)
-            }
+            SleepTimerSettingView(
+                weekdayTitle: "월 화 수 목 금",
+                startDate: viewModel.startDate,
+                endDate: viewModel.endDate,
+                sleepHoursText: viewModel.sleepHoursText,
+                onTapStart: { viewModel.showingStartPicker = true },
+                onTapEnd: { viewModel.showingEndPicker = true }
+            )
 
             Spacer()
             Button(action: {
