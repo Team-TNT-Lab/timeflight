@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct timeflightApp: App {
@@ -24,8 +25,10 @@ struct timeflightApp: App {
 //                        }
 //                    }
             }
-        }.environmentObject(authManager)
-            .environmentObject(screenTimeManager)
+        }
+        .modelContainer(for: [UserSettings.self])
+        .environmentObject(authManager)
+        .environmentObject(screenTimeManager)
 //            .environmentObject(coordinator)
     }
 }

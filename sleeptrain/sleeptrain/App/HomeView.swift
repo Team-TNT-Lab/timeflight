@@ -14,15 +14,15 @@ struct HomeView: View {
     @StateObject private var nfcScanManager = NFCManager()
     var body: some View {
         TabView {
-            FlightView().tabItem {
-                Image(systemName: "airplane")
-                Text("비행")
-            }
-            SettingView()
-                .tabItem {
-                    Image(systemName: "ellipsis")
-                    Text("설정")
-                }
+//            FlightView().tabItem {
+//                Image(systemName: "airplane")
+//                Text("비행")
+//            }
+//            SettingView()
+//                .tabItem {
+//                    Image(systemName: "ellipsis")
+//                    Text("설정")
+//                }
         }.task {
             if !authManager.isAuthorized {
                 authManager.requestAuthorization()
