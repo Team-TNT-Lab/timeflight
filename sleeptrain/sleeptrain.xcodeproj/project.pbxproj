@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		7DCC163A2E7C30E700499E59 /* timeflight.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = timeflight.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7DCC163A2E7C30E700499E59 /* sleeptrain.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = sleeptrain.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		7DCC163C2E7C30E700499E59 /* timeflight */ = {
+		7DCC163C2E7C30E700499E59 /* sleeptrain */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = timeflight;
+			path = sleeptrain;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -32,7 +32,7 @@
 		7DCC16312E7C30E700499E59 = {
 			isa = PBXGroup;
 			children = (
-				7DCC163C2E7C30E700499E59 /* timeflight */,
+				7DCC163C2E7C30E700499E59 /* sleeptrain */,
 				7DCC163B2E7C30E700499E59 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -40,7 +40,7 @@
 		7DCC163B2E7C30E700499E59 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				7DCC163A2E7C30E700499E59 /* timeflight.app */,
+				7DCC163A2E7C30E700499E59 /* sleeptrain.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,9 +48,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		7DCC16392E7C30E700499E59 /* timeflight */ = {
+		7DCC16392E7C30E700499E59 /* sleeptrain */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 7DCC16452E7C30E800499E59 /* Build configuration list for PBXNativeTarget "timeflight" */;
+			buildConfigurationList = 7DCC16452E7C30E800499E59 /* Build configuration list for PBXNativeTarget "sleeptrain" */;
 			buildPhases = (
 				7DCC16362E7C30E700499E59 /* Sources */,
 				7DCC16372E7C30E700499E59 /* Frameworks */,
@@ -61,13 +61,13 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				7DCC163C2E7C30E700499E59 /* timeflight */,
+				7DCC163C2E7C30E700499E59 /* sleeptrain */,
 			);
-			name = timeflight;
+			name = sleeptrain;
 			packageProductDependencies = (
 			);
 			productName = timeflight;
-			productReference = 7DCC163A2E7C30E700499E59 /* timeflight.app */;
+			productReference = 7DCC163A2E7C30E700499E59 /* sleeptrain.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -85,7 +85,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 7DCC16352E7C30E700499E59 /* Build configuration list for PBXProject "timeflight" */;
+			buildConfigurationList = 7DCC16352E7C30E700499E59 /* Build configuration list for PBXProject "sleeptrain" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -99,7 +99,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				7DCC16392E7C30E700499E59 /* timeflight */,
+				7DCC16392E7C30E700499E59 /* sleeptrain */,
 			);
 		};
 /* End PBXProject section */
@@ -253,7 +253,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = timeflight/timeflight.entitlements;
+				CODE_SIGN_ENTITLEMENTS = sleeptrain/sleeptrain.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 9A96KXU385;
@@ -270,11 +270,15 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.finn.timeflight;
+				PRODUCT_BUNDLE_IDENTIFIER = xyz.tntlab.sleeptrain;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -283,7 +287,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = timeflight/timeflight.entitlements;
+				CODE_SIGN_ENTITLEMENTS = sleeptrain/sleeptrain.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 9A96KXU385;
@@ -300,18 +304,22 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.finn.timeflight;
+				PRODUCT_BUNDLE_IDENTIFIER = xyz.tntlab.sleeptrain;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		7DCC16352E7C30E700499E59 /* Build configuration list for PBXProject "timeflight" */ = {
+		7DCC16352E7C30E700499E59 /* Build configuration list for PBXProject "sleeptrain" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7DCC16432E7C30E800499E59 /* Debug */,
@@ -320,7 +328,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		7DCC16452E7C30E800499E59 /* Build configuration list for PBXNativeTarget "timeflight" */ = {
+		7DCC16452E7C30E800499E59 /* Build configuration list for PBXNativeTarget "sleeptrain" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7DCC16462E7C30E800499E59 /* Debug */,
