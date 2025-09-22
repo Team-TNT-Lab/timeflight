@@ -35,10 +35,10 @@ final class SleepRecord: Identifiable {
 }
 
 enum JourneyStatus: String, Codable {
-    case waitingToBoard
-    case onTrack
-    case arrived
-    case delayed
-    case emergencyStop
-    case cancelled
+    case waitingToBoard = "waitingToBoard"
+    case onTrack = "onTrack"
+    case arrived = "arrived"
+    case delayed = "delayed"
+    case emergencyStop = "emergencyStop"
+    case cancelled = "cancelled"
 }
