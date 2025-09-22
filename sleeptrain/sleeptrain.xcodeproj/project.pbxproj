@@ -6,6 +6,22 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		ED8CF2192E81A90500EAFF94 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED8CF2182E81A90500EAFF94 /* WidgetKit.framework */; };
+		ED8CF21B2E81A90500EAFF94 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED8CF21A2E81A90500EAFF94 /* SwiftUI.framework */; };
+		ED8CF22C2E81A90600EAFF94 /* SleepTrainWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = ED8CF2162E81A90500EAFF94 /* SleepTrainWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		ED8CF22A2E81A90600EAFF94 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7DCC16322E7C30E700499E59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = ED8CF2152E81A90500EAFF94;
+			remoteInfo = SleepTrainWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		ED9B68BE2E814BA000C6D128 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -13,6 +29,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
+				ED8CF22C2E81A90600EAFF94 /* SleepTrainWidgetExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -21,12 +38,33 @@
 
 /* Begin PBXFileReference section */
 		7DCC163A2E7C30E700499E59 /* sleeptrain.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = sleeptrain.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		ED8CF2162E81A90500EAFF94 /* SleepTrainWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SleepTrainWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		ED8CF2182E81A90500EAFF94 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		ED8CF21A2E81A90500EAFF94 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		ED8CF22F2E81A90600EAFF94 /* Exceptions for "SleepTrainWidget" folder in "SleepTrainWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = ED8CF2152E81A90500EAFF94 /* SleepTrainWidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		7DCC163C2E7C30E700499E59 /* sleeptrain */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = sleeptrain;
+			sourceTree = "<group>";
+		};
+		ED8CF21C2E81A90500EAFF94 /* SleepTrainWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				ED8CF22F2E81A90600EAFF94 /* Exceptions for "SleepTrainWidget" folder in "SleepTrainWidgetExtension" target */,
+			);
+			path = SleepTrainWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -39,6 +77,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		ED8CF2132E81A90500EAFF94 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ED8CF21B2E81A90500EAFF94 /* SwiftUI.framework in Frameworks */,
+				ED8CF2192E81A90500EAFF94 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -46,6 +93,8 @@
 			isa = PBXGroup;
 			children = (
 				7DCC163C2E7C30E700499E59 /* sleeptrain */,
+				ED8CF21C2E81A90500EAFF94 /* SleepTrainWidget */,
+				ED8CF2172E81A90500EAFF94 /* Frameworks */,
 				7DCC163B2E7C30E700499E59 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -54,8 +103,18 @@
 			isa = PBXGroup;
 			children = (
 				7DCC163A2E7C30E700499E59 /* sleeptrain.app */,
+				ED8CF2162E81A90500EAFF94 /* SleepTrainWidgetExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		ED8CF2172E81A90500EAFF94 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				ED8CF2182E81A90500EAFF94 /* WidgetKit.framework */,
+				ED8CF21A2E81A90500EAFF94 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -73,6 +132,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				ED8CF22B2E81A90600EAFF94 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				7DCC163C2E7C30E700499E59 /* sleeptrain */,
@@ -83,6 +143,28 @@
 			productName = timeflight;
 			productReference = 7DCC163A2E7C30E700499E59 /* sleeptrain.app */;
 			productType = "com.apple.product-type.application";
+		};
+		ED8CF2152E81A90500EAFF94 /* SleepTrainWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ED8CF2302E81A90600EAFF94 /* Build configuration list for PBXNativeTarget "SleepTrainWidgetExtension" */;
+			buildPhases = (
+				ED8CF2122E81A90500EAFF94 /* Sources */,
+				ED8CF2132E81A90500EAFF94 /* Frameworks */,
+				ED8CF2142E81A90500EAFF94 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				ED8CF21C2E81A90500EAFF94 /* SleepTrainWidget */,
+			);
+			name = SleepTrainWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = SleepTrainWidgetExtension;
+			productReference = ED8CF2162E81A90500EAFF94 /* SleepTrainWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -96,6 +178,9 @@
 				TargetAttributes = {
 					7DCC16392E7C30E700499E59 = {
 						CreatedOnToolsVersion = 16.4;
+					};
+					ED8CF2152E81A90500EAFF94 = {
+						CreatedOnToolsVersion = 26.0;
 					};
 				};
 			};
@@ -114,12 +199,20 @@
 			projectRoot = "";
 			targets = (
 				7DCC16392E7C30E700499E59 /* sleeptrain */,
+				ED8CF2152E81A90500EAFF94 /* SleepTrainWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		7DCC16382E7C30E700499E59 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ED8CF2142E81A90500EAFF94 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -136,7 +229,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		ED8CF2122E81A90500EAFF94 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		ED8CF22B2E81A90600EAFF94 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = ED8CF2152E81A90500EAFF94 /* SleepTrainWidgetExtension */;
+			targetProxy = ED8CF22A2E81A90600EAFF94 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		7DCC16432E7C30E800499E59 /* Debug */ = {
@@ -340,6 +448,72 @@
 			};
 			name = Release;
 		};
+		ED8CF22D2E81A90600EAFF94 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = RP5GZ99V95;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SleepTrainWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = SleepTrainWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = xyz.tntlab.sleeptrain.SleepTrainWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		ED8CF22E2E81A90600EAFF94 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = RP5GZ99V95;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SleepTrainWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = SleepTrainWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = xyz.tntlab.sleeptrain.SleepTrainWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -357,6 +531,15 @@
 			buildConfigurations = (
 				7DCC16462E7C30E800499E59 /* Debug */,
 				7DCC16472E7C30E800499E59 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		ED8CF2302E81A90600EAFF94 /* Build configuration list for PBXNativeTarget "SleepTrainWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ED8CF22D2E81A90600EAFF94 /* Debug */,
+				ED8CF22E2E81A90600EAFF94 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
