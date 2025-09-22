@@ -30,10 +30,11 @@ final class SleepRecord: Identifiable {
         self.actualArrivalTime = actualArrivalTime
         self.status = status
         self.targetDepartureTime = targetDepartureTime
+        self.targetArrivalTime = targetArrivalTime
     }
 }
 
-enum JourneyStatus {
+enum JourneyStatus: String, Codable {
     case waitingToBoard
     case onTrack
     case arrived
