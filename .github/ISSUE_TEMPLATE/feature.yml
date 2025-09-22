@@ -1,0 +1,24 @@
+name: ✨ 기능 개발
+description: 새로운 기능을 개발할 때 사용하세요!
+title: "✨ Feature: "
+labels: ["Feature"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: 📌 개요
+      description: 기능의 목적과 핵심 내용을 설명해주세요.
+      placeholder: 예) 사용자 프로필 편집 기능 구현
+    validations:
+      required: true
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: 📋 작업 항목 (Checklist)
+      description: 구현해야 할 세부 작업을 적어주세요.
+      placeholder: |
+        - [ ] UI 레이아웃 구성
+      value: "- [ ] "
+    validations:
+      required: true
