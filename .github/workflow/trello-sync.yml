@@ -33,7 +33,7 @@ jobs:
         env:
           TRELLO_KEY: ${{ secrets.TRELLO_KEY }}
           TRELLO_TOKEN: ${{ secrets.TRELLO_TOKEN }}
-          DONE_LIST_ID: ${{ secrets.TRELLO_DONE_LIST_ID }}
+          DONE_LIST_ID: ${{ secrets.TRELLO_COMPLETE_ID }}
         run: |
           ISSUE_NUM=${{ github.event.issue.number }}
           QUERY="%5B%23${ISSUE_NUM}%5D"  # "[#123]" URL-encoded
