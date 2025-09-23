@@ -36,7 +36,7 @@ struct TimePickerSheet: View {
                 .font(.system(size: 18, weight: .semibold))
                 .padding()
         }
-        .presentationDetents([.height(200)])
+        .presentationDetents([.height(300)])
         .presentationDragIndicator(.visible)
     }
 }
