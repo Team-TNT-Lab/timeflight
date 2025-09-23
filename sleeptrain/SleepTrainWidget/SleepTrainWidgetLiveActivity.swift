@@ -11,70 +11,126 @@ import SwiftUI
 
 struct SleepTrainWidgetAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable {
-        // Dynamic stateful properties about your activity go here!
-        var emoji: String
+        var actualDepartureTime: Date?
+        var currentTime: Date
+        var status: JourneyStatus
     }
 
-    // Fixed non-changing properties about your activity go here!
-    var name: String
+    var targetDepartureTime: Date
+    var targetArrivalTime: Date
+    var departureDayString: String
+    var arrivalDayString: String
 }
 
 struct SleepTrainWidgetLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: SleepTrainWidgetAttributes.self) { context in
-            // Lock screen/banner UI goes here
-            VStack {
-                Text("Hello \(context.state.emoji)")
-            }
-            .activityBackgroundTint(Color.cyan)
-            .activitySystemActionForegroundColor(Color.black)
-
+            SleepTrainLiveActivityView(context: context)
         } dynamicIsland: { context in
             DynamicIsland {
-                // Expanded UI goes here.  Compose the expanded UI through
-                // various regions, like leading/trailing/center/bottom
                 DynamicIslandExpandedRegion(.leading) {
-                    Text("Leading")
+                    TargetTimeTextView(time: context.attributes.targetDepartureTime)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text("Trailing")
+                    TargetTimeTextView(time: context.attributes.targetArrivalTime)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Text("Bottom \(context.state.emoji)")
-                    // more content
+                    SleepTrainInfoView(context: context)
+                    .padding(.top, 4)
                 }
             } compactLeading: {
-                Text("L")
+                Image(systemName: "train.side.front.car")
+                    .font(.system(size: 17))
+                    .foregroundStyle(.white)
             } compactTrailing: {
-                Text("T \(context.state.emoji)")
+                StatusIndicatorSmallView(
+                    targetDepartureTime: context.attributes.targetDepartureTime,
+                    targetArrivalTime: context.attributes.targetArrivalTime,
+                    status: context.state.status,
+                    currentTime: context.state.currentTime
+                )
             } minimal: {
-                Text(context.state.emoji)
+                Image(systemName: "train.side.front.car")
+                    .font(.system(size: 17))
+                    .foregroundStyle(.white)
             }
             .widgetURL(URL(string: "http://www.apple.com"))
-            .keylineTint(Color.red)
+            .keylineTint(.black)
+            .contentMargins(.horizontal, 30, for: .expanded)
+            .contentMargins(.vertical, 24, for: .expanded)
         }
+        .supplementalActivityFamilies([.small, .medium])
     }
 }
 
 extension SleepTrainWidgetAttributes {
     fileprivate static var preview: SleepTrainWidgetAttributes {
-        SleepTrainWidgetAttributes(name: "World")
+        SleepTrainWidgetAttributes(
+            targetDepartureTime: Calendar.current.date(bySettingHour: 22, minute: 0, second: 0, of: Date())!,
+            targetArrivalTime:  Calendar.current.date(bySettingHour: 6, minute: 0, second: 0, of: Date().addingTimeInterval(86_400))!,
+            departureDayString: "MON",
+            arrivalDayString: "TUE"
+        )
     }
 }
 
 extension SleepTrainWidgetAttributes.ContentState {
-    fileprivate static var smiley: SleepTrainWidgetAttributes.ContentState {
-        SleepTrainWidgetAttributes.ContentState(emoji: "😀")
+    fileprivate static var waitingToBoard: SleepTrainWidgetAttributes.ContentState {
+        SleepTrainWidgetAttributes.ContentState(
+            actualDepartureTime: nil as Date?,
+            currentTime: Calendar.current.date(bySettingHour: 21, minute: 30, second: 0, of: Date())!,
+            status: .waitingToBoard,
+        )
      }
-     
-     fileprivate static var starEyes: SleepTrainWidgetAttributes.ContentState {
-         SleepTrainWidgetAttributes.ContentState(emoji: "🤩")
+    
+    fileprivate static var delayed: SleepTrainWidgetAttributes.ContentState {
+        SleepTrainWidgetAttributes.ContentState(
+            actualDepartureTime: nil as Date?,
+            currentTime: Calendar.current.date(bySettingHour: 22, minute: 15, second: 0, of: Date())!,
+            status: .delayed,
+        )
+     }
+    
+    fileprivate static var tooMuchDelayed: SleepTrainWidgetAttributes.ContentState {
+        SleepTrainWidgetAttributes.ContentState(
+            actualDepartureTime: nil as Date?,
+            currentTime: Calendar.current.date(bySettingHour: 23, minute: 1, second: 0, of: Date())!,
+            status: .tooMuchDelayed,
+        )
+     }
+    
+    fileprivate static var onTrack: SleepTrainWidgetAttributes.ContentState {
+        SleepTrainWidgetAttributes.ContentState(
+            actualDepartureTime: Calendar.current.date(bySettingHour: 22, minute: 0, second: 0, of: Date())!,
+            currentTime: Calendar.current.date(bySettingHour: 23, minute: 30, second: 0, of: Date())!,
+            status: .onTrack,
+        )
      }
 }
 
 #Preview("Notification", as: .content, using: SleepTrainWidgetAttributes.preview) {
    SleepTrainWidgetLiveActivity()
 } contentStates: {
-    SleepTrainWidgetAttributes.ContentState.smiley
-    SleepTrainWidgetAttributes.ContentState.starEyes
+    SleepTrainWidgetAttributes.ContentState.waitingToBoard
+    SleepTrainWidgetAttributes.ContentState.onTrack
+    SleepTrainWidgetAttributes.ContentState.delayed
+    SleepTrainWidgetAttributes.ContentState.tooMuchDelayed
+}
+
+#Preview("Dynamic Island", as: .dynamicIsland(.expanded), using: SleepTrainWidgetAttributes.preview) {
+   SleepTrainWidgetLiveActivity()
+} contentStates: {
+    SleepTrainWidgetAttributes.ContentState.waitingToBoard
+    SleepTrainWidgetAttributes.ContentState.onTrack
+    SleepTrainWidgetAttributes.ContentState.delayed
+    SleepTrainWidgetAttributes.ContentState.tooMuchDelayed
+}
+
+#Preview("Dynamic Island (Compact)", as: .dynamicIsland(.compact), using: SleepTrainWidgetAttributes.preview) {
+   SleepTrainWidgetLiveActivity()
+} contentStates: {
+    SleepTrainWidgetAttributes.ContentState.waitingToBoard
+    SleepTrainWidgetAttributes.ContentState.onTrack
+    SleepTrainWidgetAttributes.ContentState.delayed
+    SleepTrainWidgetAttributes.ContentState.tooMuchDelayed
 }
