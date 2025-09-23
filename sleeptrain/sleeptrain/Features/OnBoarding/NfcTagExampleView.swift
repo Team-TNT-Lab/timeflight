@@ -14,19 +14,24 @@ struct NfcTagExampleView: View {
         self.onNext = onNext
     }
 
+    @State private var isImageVisible = false
     let nfcScanManager = NFCManager()
     var body: some View {
         VStack {
-            Spacer()
+            Spacer().frame(height: 40)
             VStack(spacing: 14) {
                 Text("이제 카드를 등록해볼까요?").font(.system(size: 23, weight: .semibold))
                 Text("아이폰의 상단 부분에 카드를 태그하면 돼요")
                     .font(.system(size: 13, weight: .thin))
             }
             Spacer()
-            Image("NfcTagImage").resizable().scaledToFit()
+            Image("NfcTagImage").resizable().scaledToFit().opacity(isImageVisible ? 1 : 0)
+                .onAppear {
+                    withAnimation(.easeIn(duration: 1.0)) {
+                        isImageVisible = true
+                    }
+                }
             Spacer()
-        }.safeAreaInset(edge: .bottom) {
             VStack(spacing: 17) {
                 PrimaryButton(buttonText: "카드 등록하기") {
                     nfcScanManager.startNFCScan(alertMessage: "카드 태그 완료!") { _ in

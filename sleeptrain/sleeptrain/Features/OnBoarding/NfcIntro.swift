@@ -13,26 +13,34 @@ struct NfcIntro: View {
         self.onNext = onNext
     }
 
+    @State private var isImageVisible = false
     var body: some View {
-        ZStack(alignment: .top) {
-            Image("NfcIntro")
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
-                .clipped()
-                .offset(y: 80)
+        VStack {
+            ZStack(alignment: .top) {
+                Image("NfcIntro")
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
+                    .clipped()
+                    .offset(y: 80)
+                    .opacity(isImageVisible ? 1 : 0)
+                    .onAppear {
+                        withAnimation(.easeIn(duration: 1.0)) {
+                            isImageVisible = true
+                        }
+                    }
+                VStack(spacing: 12) {
+                    Text("드림 카드에 아이폰을 태그하면\n수면 운행이 시작돼요")
+                        .font(.system(size: 23, weight: .semibold))
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.white)
 
-            VStack(spacing: 12) {
-                Text("드림 카드에 아이폰을 태그하면\n수면 운행이 시작돼요")
-                    .font(.system(size: 23, weight: .semibold))
-                    .multilineTextAlignment(.center)
-                    .foregroundColor(.white)
-
-                Text("수면 비행이 시작되면 선택한 앱이 잠기게 돼요.\n잠금은 설정한 기상 시간에 해제되거나 수동으로 풀 수 있어요.")
-                    .font(.system(size: 13, weight: .thin))
-                    .multilineTextAlignment(.center)
+                    Text("수면 비행이 시작되면 선택한 앱이 잠기게 돼요.\n잠금은 설정한 기상 시간에 해제되거나 수동으로 풀 수 있어요.")
+                        .font(.system(size: 13, weight: .thin))
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.top, 60)
             }
-            .padding(.top, 60)
         }.safeAreaInset(edge: .bottom) {
             PrimaryButton(buttonText: "다음", action: { onNext() })
         }
