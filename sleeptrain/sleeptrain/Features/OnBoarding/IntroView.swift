@@ -9,6 +9,10 @@ import SwiftUI
 
 struct IntroView: View {
     let onNext: () -> Void
+    init(_ onNext: @escaping () -> Void) {
+        self.onNext = onNext
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             Image("IntroBackground")

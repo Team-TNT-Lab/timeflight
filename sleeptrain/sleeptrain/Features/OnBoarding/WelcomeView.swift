@@ -9,6 +9,10 @@ import SwiftUI
 
 struct WelcomeView: View {
     let onNext: () -> Void
+    init(_ onNext: @escaping () -> Void) {
+        self.onNext = onNext
+    }
+
     var body: some View {
         VStack {
             Spacer()
