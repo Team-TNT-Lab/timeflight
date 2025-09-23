@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct TrainTicketView: View {
-    @StateObject private var viewModel = TrainTicketViewModel()
+    @EnvironmentObject var viewModel: TrainTicketViewModel
     
     var body: some View {
         VStack(spacing: 0) {
@@ -122,9 +122,10 @@ class TrainTicketViewModel: ObservableObject {
     // 목업 데이터
     private let mockSchedules = [
         MockSchedule(startTime: "23:30", endTime: "07:30", startDay: "MON", endDay: "TUE", remainingTime: "1시간", sleepCount: 32),
-        MockSchedule(startTime: "22:00", endTime: "06:00", startDay: "TUE", endDay: "WED", remainingTime: "2시간 30분", sleepCount: 28),
+        MockSchedule(startTime: "22:00", endTime: "06:00", startDay: "TUE", endDay: "WED", remainingTime: "지연 45분", sleepCount: 28),
         MockSchedule(startTime: "00:00", endTime: "08:00", startDay: "WED", endDay: "THU", remainingTime: "30분", sleepCount: 45),
-        MockSchedule(startTime: "23:45", endTime: "07:15", startDay: "THU", endDay: "FRI", remainingTime: "지연 15분", sleepCount: 18)
+        MockSchedule(startTime: "23:45", endTime: "07:15", startDay: "THU", endDay: "FRI", remainingTime: "지연 15분", sleepCount: 18),
+        MockSchedule(startTime: "21:30", endTime: "05:30", startDay: "FRI", endDay: "SAT", remainingTime: "지연 2시간 30분", sleepCount: 8)
     ]
     
     private var currentMockIndex = 0
