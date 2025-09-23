@@ -11,6 +11,7 @@ import FamilyControls
 
 @Model
 final class UserSettings {
+    var name: String
     var targetDepartureTime: Date
     var targetArrivalTime: Date
     var blockedApps: FamilyActivitySelection
@@ -18,12 +19,14 @@ final class UserSettings {
     var isGuestUser: Bool
     
     init(
+        name: String = "",
         targetDepartureTime: Date,
         targetArrivalTime: Date,
         blockedApps: FamilyActivitySelection = FamilyActivitySelection(),
         isOnboardingCompleted: Bool = false,
         isGuestUser: Bool = false
     ) {
+        self.name = name
         self.targetDepartureTime = targetDepartureTime
         self.targetArrivalTime = targetArrivalTime
         self.blockedApps = blockedApps
