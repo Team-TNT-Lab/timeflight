@@ -42,6 +42,9 @@ struct OnBoardingView: View {
             NfcIntro(next)
                 .onboardingTransition()
 
+        case 6:
+            NfcTagExampleView(next)
+
         default:
             EmptyView()
         }
