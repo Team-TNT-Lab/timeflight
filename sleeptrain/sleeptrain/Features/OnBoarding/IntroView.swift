@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct IntroView: View {
+    let onNext: () -> Void
     var body: some View {
         VStack(spacing: 0) {
             Image("IntroBackground")
@@ -32,7 +33,7 @@ struct IntroView: View {
             Spacer(minLength: 0)
         }
         .safeAreaInset(edge: .bottom) {
-            PrimaryButton(buttonText: "다음", action: { print("2") })
+            PrimaryButton(buttonText: "다음", action: { onNext() })
         }
     }
 }

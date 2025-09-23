@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct WelcomeView: View {
+    let onNext: () -> Void
     var body: some View {
         VStack {
             Spacer()
@@ -21,7 +22,7 @@ struct WelcomeView: View {
             Spacer()
             Spacer()
             VStack(spacing: 13) {
-                PrimaryButton(buttonText: "시작하기", action: { print("Hi") })
+                PrimaryButton(buttonText: "시작하기", action: { onNext() })
 
                 Text("Made by").font(.system(size: 13)).foregroundColor(Color.gray)
             }

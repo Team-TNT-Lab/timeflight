@@ -8,11 +8,31 @@
 import SwiftUI
 
 struct OnBoardingView: View {
+    @State private var step: Int = 0
     var body: some View {
-        TabView {
-            WelcomeView()
+        VStack {
+            stepContent
+        }.statusBarHidden(step == 1)
+    }
+
+    @ViewBuilder
+    private var stepContent: some View {
+        switch step {
+        case 0:
+            WelcomeView(onNext: { step += 1 })
+
+        case 1:
+            IntroView(onNext: { step += 1 }).ignoresSafeArea(.container, edges: .top)
+
+        case 2:
+            NameInputView()
+
+        case 3:
+            TimeSettingView()
+
+        default:
+            EmptyView()
         }
-        .tabViewStyle(.page(indexDisplayMode: .never))
     }
 }
 
