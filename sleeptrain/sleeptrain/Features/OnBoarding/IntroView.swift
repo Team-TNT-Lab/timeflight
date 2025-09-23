@@ -32,7 +32,7 @@ struct IntroView: View {
             Spacer(minLength: 0)
         }
         .safeAreaInset(edge: .bottom) {
-            CommonButton(buttonText: "다음", action: { print("2") })
+            PrimaryButton(buttonText: "다음", action: { print("2") })
         }
     }
 }

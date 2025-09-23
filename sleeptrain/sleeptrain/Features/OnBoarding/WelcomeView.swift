@@ -21,27 +21,17 @@ struct WelcomeView: View {
             Spacer()
             Spacer()
             VStack(spacing: 13) {
-                Button {
-                    // action
-                } label: {
-                    Text("시작하기")
-                        .font(.system(size: 20, weight: .heavy))
-                        .frame(maxWidth: .infinity, minHeight: 56)
-                        .foregroundColor(.black)
-                        .background(Color.white)
-                        .clipShape(.capsule)
-                        .padding(.horizontal, 20)
-                }
+                PrimaryButton(buttonText: "시작하기", action: { print("Hi") })
 
                 Text("Made by").font(.system(size: 13)).foregroundColor(Color.gray)
-
-                HStack(spacing: 8) {
-                    Image("tnt")
-                        .resizable()
-                        .frame(width: 25, height: 25)
-                    Text("tntlab")
-                        .font(.custom("Afacad-Bold", size: 31))
-                }
+            }
+        }.safeAreaInset(edge: .bottom) {
+            HStack(spacing: 8) {
+                Image("tnt")
+                    .resizable()
+                    .frame(width: 25, height: 25)
+                Text("tntlab")
+                    .font(.custom("Afacad-Bold", size: 31))
             }
         }
     }
