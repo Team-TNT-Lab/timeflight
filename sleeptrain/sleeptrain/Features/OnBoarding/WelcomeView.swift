@@ -28,7 +28,7 @@ struct WelcomeView: View {
             VStack(spacing: 13) {
                 PrimaryButton(buttonText: "시작하기", action: { onNext() })
 
-                Text("Made by").font(.system(size: 13)).foregroundColor(Color.gray)
+                Text("Made by").font(.system(size: 13)).foregroundStyle(Color.gray)
             }
         }.safeAreaInset(edge: .bottom) {
             HStack(spacing: 8) {

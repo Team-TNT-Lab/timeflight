@@ -33,7 +33,7 @@ struct NfcIntro: View {
                     Text("드림 카드에 아이폰을 태그하면\n수면 운행이 시작돼요")
                         .font(.system(size: 23, weight: .semibold))
                         .multilineTextAlignment(.center)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
 
                     Text("수면 비행이 시작되면 선택한 앱이 잠기게 돼요.\n잠금은 설정한 기상 시간에 해제되거나 수동으로 풀 수 있어요.")
                         .font(.system(size: 13, weight: .thin))

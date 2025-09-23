@@ -30,11 +30,11 @@ struct TimeSettingView: View {
                 VStack(spacing: 10) {
                     Text("수면 시간을 설정해주세요")
                         .font(.system(size: 23, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
 
                     Text("평균 7시간 이상의 수면을 추천해요")
                         .font(.system(size: 16))
-                        .foregroundColor(.white.opacity(0.4))
+                        .foregroundStyle(.white.opacity(0.4))
                 }
                 Spacer()
 
@@ -42,8 +42,8 @@ struct TimeSettingView: View {
                     Spacer()
                     VStack(spacing: 15) {
                         Text("잠드는 시간")
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(.white.opacity(0.8))
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundStyle(.white.opacity(0.8))
 
                         Button {
                             isShowingBedTimePicker = true
@@ -54,8 +54,8 @@ struct TimeSettingView: View {
 
                     VStack(spacing: 15) {
                         Text("일어나는 시간")
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(.white.opacity(0.8))
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundStyle(.white.opacity(0.8))
 
                         Button {
                             isShowingWakeTimePicker = true
@@ -64,10 +64,9 @@ struct TimeSettingView: View {
                         }
                     }
                     Spacer()
-                    // 수면 시간 표시
                     Text(sleepDurationText)
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.white.opacity(0.6))
+                        .foregroundStyle(.white.opacity(0.6))
                 }
             }
             .padding(.all, 20)
@@ -77,7 +76,7 @@ struct TimeSettingView: View {
             } label: {
                 Text("다음")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.black)
+                    .foregroundStyle(.black)
                     .frame(maxWidth: .infinity)
                     .frame(height: 56)
                     .background(Color.white)
@@ -111,6 +110,9 @@ struct TimeSettingView: View {
         if let settings = userSettings.first {
             bedTime = settings.targetDepartureTime
             wakeTime = settings.targetArrivalTime
+        } else {
+            bedTime = Calendar.current.date(bySettingHour: 23, minute: 00, second: 0, of: Date()) ?? Date()
+            wakeTime = Calendar.current.date(bySettingHour: 7, minute: 00, second: 0, of: Date()) ?? Date()
         }
     }
 
@@ -128,8 +130,6 @@ struct TimeSettingView: View {
         }
     }
 }
-
-
 
 #Preview {
     TimeSettingView { print("Next") }

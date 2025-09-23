@@ -32,7 +32,7 @@ struct NameInputView: View {
                 .overlay(
                     Rectangle()
                         .frame(height: 1)
-                        .foregroundColor(.gray.opacity(0.5)),
+                        .foregroundStyle(.gray.opacity(0.5)),
                     alignment: .bottom
                 )
                 .frame(maxWidth: 200)
