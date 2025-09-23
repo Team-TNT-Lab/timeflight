@@ -5,9 +5,9 @@
 //  Created by 양시준 on 9/22/25.
 //
 
+import FamilyControls
 import Foundation
 import SwiftData
-import FamilyControls
 
 @Model
 final class UserSettings {
@@ -17,9 +17,9 @@ final class UserSettings {
     var blockedApps: FamilyActivitySelection
     var isOnboardingCompleted: Bool
     var isGuestUser: Bool
-    
+
     init(
-        name: String = "",
+        name: String = "굿나잇",
         targetDepartureTime: Date,
         targetArrivalTime: Date,
         blockedApps: FamilyActivitySelection = FamilyActivitySelection(),

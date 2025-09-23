@@ -5,6 +5,7 @@
 //  Created by bishoe01 on 9/23/25.
 //
 
+import SwiftData
 import SwiftUI
 
 struct NfcTagExampleView: View {
@@ -14,8 +15,11 @@ struct NfcTagExampleView: View {
         self.onNext = onNext
     }
 
+    @Environment(\.modelContext) private var modelContext
+    @Query private var userSettings: [UserSettings]
     @State private var isImageVisible = false
     let nfcScanManager = NFCManager()
+
     var body: some View {
         VStack {
             Spacer().frame(height: 40)
