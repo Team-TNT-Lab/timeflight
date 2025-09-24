@@ -71,16 +71,8 @@ struct TimeSettingView: View {
             }
             .padding(.all, 20)
         }.safeAreaInset(edge: .bottom, content: {
-            Button {
+            PrimaryButton(buttonText: "다음") {
                 saveTimeSettings()
-            } label: {
-                Text("다음")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(.black)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 56)
-                    .background(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 28))
             }
         })
         .onAppear {

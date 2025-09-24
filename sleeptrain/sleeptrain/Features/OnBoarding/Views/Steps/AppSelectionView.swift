@@ -23,17 +23,15 @@ struct AppSelectionView: View {
     }
 
     var body: some View {
-        VStack {
-            FamilyActivityPicker(selection: $screenTimeManager.selection)
-
-        }.safeAreaInset(edge: .bottom) {
-            PrimaryButton(buttonText: "다음") {
-                saveSelectedApps()
+        FamilyActivityPicker(selection: $screenTimeManager.selection)
+            .safeAreaInset(edge: .bottom) {
+                PrimaryButton(buttonText: "다음") {
+                    saveSelectedApps()
+                }
             }
-        }
-        .onAppear {
-            loadExistingSelection()
-        }
+            .onAppear {
+                loadExistingSelection()
+            }
     }
 
     private func loadExistingSelection() {
