@@ -8,21 +8,6 @@
 import Foundation
 import ActivityKit
 
-//
-//public struct SleepTrainWidgetAttributes: ActivityAttributes {
-//    public struct ContentState: Codable, Hashable {
-//        var actualDepartureTime: Date?
-//        var currentTime: Date
-//        var status: JourneyStatus
-//    }
-//
-//    var targetDepartureTime: Date
-//    var targetArrivalTime: Date
-//    var departureDayString: String
-//    var arrivalDayString: String
-//}
-
-
 class LiveActivityManager {
     static let shared = LiveActivityManager()
     
