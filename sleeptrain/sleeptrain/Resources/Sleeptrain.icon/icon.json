@@ -7,8 +7,23 @@
       "layers" : [
         {
           "glass" : false,
+          "image-name" : "Group 4.png",
+          "name" : "train",
+          "opacity" : 0.8,
+          "position" : {
+            "scale" : 1.7,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "glass" : false,
+          "hidden" : true,
           "image-name" : "Vector.png",
           "name" : "Vector",
+          "opacity" : 0.7,
           "position" : {
             "scale" : 1.5,
             "translation-in-points" : [

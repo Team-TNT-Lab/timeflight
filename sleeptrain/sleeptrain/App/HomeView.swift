@@ -10,8 +10,25 @@ import SwiftUI
 struct HomeView: View {
     var body: some View {
         TabView {
-            // HomeView넣는 부분
-            Text("Train Home View")
+//            FlightView().tabItem {
+//                Image(systemName: "airplane")
+//                Text("비행")
+//            }
+//            SettingView()
+//                .tabItem {
+//                    Image(systemName: "ellipsis")
+//                    Text("설정")
+//                }
+            Button("알림 설정") {
+                NotificationManager.shared.scheduleNotification(at: Date.now.advanced(by: 5))
+            }
+            .onAppear {
+                NotificationManager.shared.requestAuthorization()
+            }
+        }.task {
+            if !authManager.isAuthorized {
+                authManager.requestAuthorization()
+            }
         }
     }
 }
