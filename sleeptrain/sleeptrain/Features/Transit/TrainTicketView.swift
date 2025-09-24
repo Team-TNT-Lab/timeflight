@@ -97,7 +97,7 @@ struct TrainTicketView: View {
             .padding(.bottom, 20)
         }
         .background(Color.black)
-        .clipShape(RoundedRectangle(cornerRadius: 40))
+        .clipShape(RoundedRectangle(cornerRadius: 28))
         .onAppear {
             viewModel.loadSchedule()
         }

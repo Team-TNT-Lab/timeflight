@@ -7,6 +7,29 @@
 
 import SwiftUI
 
+// MARK: - 공용 배경 그라데이션 뷰 (Home/기록 등에서 재사용)
+fileprivate struct BackgroundGradientLayer: View {
+    var body: some View {
+        let cssAngle = 177.0
+        let r = cssAngle * .pi / 180.0
+        let dx = sin(r)
+        let dy = -cos(r)
+        
+        let start = UnitPoint(x: 0.5 - 0.5 * dx, y: 0.5 - 0.5 * dy)
+        let end   = UnitPoint(x: 0.5 + 0.5 * dx, y: 0.5 + 0.5 * dy)
+        
+        let stops: [Gradient.Stop] = [
+            .init(color: Color(red: 37.0/255.0, green: 61.0/255.0, blue: 87.0/255.0), location: 0.0452),
+            .init(color: Color(red: 16.0/255.0, green: 41.0/255.0, blue: 68.0/255.0), location: 0.3129),
+            .init(color: .black, location: 0.9638)
+        ]
+        
+        return Rectangle()
+            .fill(LinearGradient(gradient: Gradient(stops: stops), startPoint: start, endPoint: end))
+            .ignoresSafeArea()
+    }
+}
+
 // MARK: - 시간 파싱/포맷 유틸 (분리 가능)
 // TODO: 다른 파일로 분리 시 fileprivate → internal 또는 유틸 타입의 static 메서드로 전환 필요.
 
@@ -110,21 +133,12 @@ extension StreakDay {
         return calendar.date(byAdding: .second, value: Int(selectedOffset), to: trainDepartureTime)
     }
     
-    // 열차 출발 시간 (기본값: 23:30)
     var trainDepartureTime: Date {
         let calendar = Calendar.current
         return calendar.date(bySettingHour: 23, minute: 30, second: 0, of: date) ?? date
     }
     
     /// 현재 시나리오에 따라 해당 날짜의 체크인 상태를 판별
-    /// - Parameters:
-    ///   - currentRemainingTime: 오늘의 남은 시간 문자열("20분" 등)
-    ///   - hasCheckedInToday: 오늘 체크인을 했는지 여부
-    ///   - todayCheckInTime: 오늘 실제 체크인 시간(있다면)
-    ///   - departureTimeString: 출발 시간 문자열("23:30")
-    ///   - parseRemainingTime: 남은 시간 텍스트를 파싱하는 함수 (분 단위 반환, 지연은 음수)
-    ///   - parseDepartureTime: 출발 시간 텍스트를 파싱하는 함수 (오늘 날짜의 Date로 변환)
-    /// - Returns: 체크인 상태(.completed/.lateCompleted/.failed/.available/.notReached/.future)
     func getCheckInStatus(
         currentRemainingTime: String = "20분",
         hasCheckedInToday: Bool = true,
@@ -151,13 +165,10 @@ extension StreakDay {
                 let timeDifference = actualCheckIn.timeIntervalSince(actualDepartureTime)
                 
                 if timeDifference >= -30 * 60 && timeDifference <= 30 * 60 {
-                    // 출발 30분 전 ~ 지연 30분: 정상 체크인 (파란색)
                     return .completed
                 } else if timeDifference > 30 * 60 && timeDifference <= 120 * 60 {
-                    // 지연 31분 ~ 2시간: 늦은 체크인 (회색 체크)
                     return .lateCompleted
                 } else {
-                    // 지연 2시간 초과: 실패 (회색 X)
                     return .failed
                 }
             }
@@ -168,36 +179,28 @@ extension StreakDay {
             }
             
             if remainingMinutes > 30 {
-                // 출발 30분 이상 전: 아직 체크인 불가
                 return .notReached
             } else if remainingMinutes < 0 && remainingMinutes >= -120 {
-                // 지연 중이지만 2시간 이내: 체크인 가능
                 return .available
             } else if remainingMinutes >= -30 {
-                // 출발 30분 이내: 체크인 가능 시간
                 return .available
             } else {
-                // 지연 2시간 초과: 실패
                 return .failed
             }
         }
         
         // 과거 날짜 - 실제 체크인 시간을 기반으로 상태 결정
         guard let actualCheckIn = checkInTime else {
-            // 체크인 하지 않은 경우 -> 실패로 간주
             return .failed
         }
         
         let timeDifference = actualCheckIn.timeIntervalSince(actualDepartureTime)
         
         if timeDifference >= -30 * 60 && timeDifference <= 30 * 60 {
-            // 출발 30분 전 ~ 지연 30분: 정상 체크인
             return .completed
         } else if timeDifference > 30 * 60 && timeDifference <= 120 * 60 {
-            // 지연 31분 ~ 2시간: 늦은 체크인
             return .lateCompleted
         } else {
-            // 지연 2시간 초과: 실패
             return .failed
         }
     }
@@ -215,26 +218,12 @@ struct HomeView: View {
     @State private var hasCheckedInToday = false
     @State private var todayCheckInTime: Date?
     
-    // Figma 배경 그라디언트(177deg, #253D57 4.52%, #102944 31.29%, #000 96.38%)
-    // CSS 각도(위쪽이 0°, 시계방향 증가)를 SwiftUI UnitPoint로 변환해 중앙을 지나는 선을 구성합니다.
-    private var backgroundGradientLayer: some View {
-        let cssAngle = 177.0
-        let r = cssAngle * .pi / 180.0
-        let dx = sin(r)          // x 증가(→)
-        let dy = -cos(r)         // y 증가(↓), UI 좌표 보정
-        
-        let start = UnitPoint(x: 0.5 - 0.5 * dx, y: 0.5 - 0.5 * dy)
-        let end   = UnitPoint(x: 0.5 + 0.5 * dx, y: 0.5 + 0.5 * dy)
-        
-        let stops: [Gradient.Stop] = [
-            .init(color: Color(red: 37.0/255.0, green: 61.0/255.0, blue: 87.0/255.0), location: 0.0452),
-            .init(color: Color(red: 16.0/255.0, green: 41.0/255.0, blue: 68.0/255.0), location: 0.3129),
-            .init(color: .black, location: 0.9638)
-        ]
-        
-        return Rectangle()
-            .fill(LinearGradient(gradient: Gradient(stops: stops), startPoint: start, endPoint: end))
-            .ignoresSafeArea()
+    // 오늘 날짜 "M월 d일" 포맷
+    private var todayDateString: String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.dateFormat = "M월 d일"
+        return formatter.string(from: Date())
     }
 
     private func formatDuration(minutes: Int) -> String {
@@ -260,7 +249,7 @@ struct HomeView: View {
         return max(diff, 0)
     }
 
-    /// 액션 버튼 위에 표시되는 안내 문구 (남은 시간/지연/다음 수면 시간 반영)
+
     private var infoBannerText: String {
         guard let remainingMinutes = parseRemainingTimeToMinutes(trainTicketViewModel.remainingTimeText) else {
             return "열차 출발 정보를 불러오는 중이에요"
@@ -276,8 +265,27 @@ struct HomeView: View {
             return "열차 출발까지 \(formatDuration(minutes: untilNext)) 남았어요"
         }
     }
+    
+    private var infoSubText: String? {
+        guard let remainingMinutes = parseRemainingTimeToMinutes(trainTicketViewModel.remainingTimeText) else {
+            return nil
+        }
+        if remainingMinutes > 30 {
+            return "미리 숙면에 취할 준비를 해주면 좋아요"
+        } else if remainingMinutes >= 1 {
+            return "지금부터는 미리 출발이 가능해요"
+        } else if remainingMinutes >= -5 {
+            return "지금 출발해야 최상의 수면을 할 수 있어요"
+        } else if remainingMinutes >= -30 {
+            let lost = abs(remainingMinutes)
+            return "내일 아침의 \(lost)분이 사라지면 너무 슬플 거예요"
+        } else if remainingMinutes >= -119 {
+            return "2시간 넘게 지연되면 연속 기록이 사라져요"
+        } else {
+            return "좋은 하루 보내세요!"
+        }
+    }
 
-    /// 지금 체크인 가능한지 여부: 출발 30분 전 이내 또는 지연 중이고 아직 미체크인
     private var canCheckIn: Bool {
         guard let remainingMinutes = parseRemainingTimeToMinutes(trainTicketViewModel.remainingTimeText) else {
             return false
@@ -285,7 +293,7 @@ struct HomeView: View {
         return (remainingMinutes <= 30 || remainingMinutes < 0) && !hasCheckedInToday
     }
 
-    /// 오늘 날짜의 체크인을 시뮬레이션(상태 업데이트 및 스트릭 갱신)
+
     private func performCheckIn() {
         guard canCheckIn else { return }
         hasCheckedInToday = true
@@ -296,7 +304,7 @@ struct HomeView: View {
         updateSleepCountBasedOnStreak()
     }
 
-    /// 현재 날짜의 체크인 상태에 따라 ViewModel의 sleepCount를 갱신
+
     private func updateSleepCountBasedOnStreak() {
         let today = Date()
         let calendar = Calendar.current
@@ -321,7 +329,7 @@ struct HomeView: View {
         }
     }
 
-    /// 연속 체크인 성공 일수 계산(미래는 건너뛰고, 오늘은 상태에 따라 처리)
+    /// 연속 체크인 성공 일수 계산
     private func calculateCurrentStreak() -> Int {
         let today = Date()
         let calendar = Calendar.current
@@ -357,7 +365,7 @@ struct HomeView: View {
         return streak
     }
 
-    /// 남은 시간과 출발 시간을 기반으로 현재 시나리오의 체크인 시간을 계산(데모용)
+    /// 남은 시간과 출발 시간을 기반으로 현재 시나리오의 체크인 시간 계산(데모용)
     private func calculateCheckInTimeForCurrentScenario() -> Date {
         let calendar = Calendar.current
         let today = Date()
@@ -381,73 +389,116 @@ struct HomeView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                TrainTicketView()
-                    .environmentObject(trainTicketViewModel)
-                    .padding(.horizontal, 16)
-                    .onTapGesture {
-                        hasCheckedInToday = false
-                        todayCheckInTime = nil
-                    }
-
-                VStack(alignment: .leading, spacing: 12) {
-                    StreakWeekView(
-                        days: weekDays,
-                        currentRemainingTime: trainTicketViewModel.remainingTimeText,
-                        hasCheckedInToday: hasCheckedInToday,
-                        todayCheckInTime: todayCheckInTime,
-                        departureTimeString: trainTicketViewModel.startTimeText
-                    )
-                }
-                .padding(.horizontal, 16)
-
+        TabView {
+            ScrollView {
                 VStack(spacing: 16) {
-                    Text(infoBannerText)
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                    
-                    Button(action: performCheckIn) {
-                        Text(hasCheckedInToday ? "비상 정지하기" : canCheckIn ? "지금 출발하기" : "지금 출발하기")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(canCheckIn && !hasCheckedInToday ? Color.white : Color.gray.opacity(0.3))
-                            .foregroundColor(canCheckIn && !hasCheckedInToday ? .black : .secondary)
-                            .cornerRadius(99)
+                    HStack(alignment: .firstTextBaseline, spacing: 10) {
+                        Text("운행 일정")
+                            .font(.custom("AppleSDGothicNeo-Bold", size: 29))
+                            .foregroundColor(.white)
+                        Text(todayDateString)
+                            .font(.custom("AppleSDGothicNeo-Bold", size: 19))
+                            .foregroundColor(.white.opacity(0.6))
+                        Spacer(minLength: 0)
                     }
-                    .disabled(!canCheckIn || hasCheckedInToday)
                     .padding(.horizontal, 16)
+                    .padding(.top, 8)
+
+                    // 티켓 카드
+                    TrainTicketView()
+                        .environmentObject(trainTicketViewModel)
+                        .padding(.horizontal, 16)
+                        .onTapGesture {
+                            hasCheckedInToday = false
+                            todayCheckInTime = nil
+                        }
+
+                    // 주간 스트릭
+                    VStack(alignment: .leading, spacing: 24) {
+                        StreakWeekView(
+                            days: weekDays,
+                            currentRemainingTime: trainTicketViewModel.remainingTimeText,
+                            hasCheckedInToday: hasCheckedInToday,
+                            todayCheckInTime: todayCheckInTime,
+                            departureTimeString: trainTicketViewModel.startTimeText
+                        )
+                    }
+                    .padding(.horizontal, 16)
+
+                    // 안내 문구 + 버튼
+                    VStack(spacing: 4) {
+                        Text(infoBannerText)
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.center)
+                            .lineSpacing(9.6)
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 90)
+
+                        if let sub = infoSubText {
+                            Text(sub)
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(.white.opacity(0.5))
+                                .multilineTextAlignment(.center)
+                                .lineSpacing(6.4)
+                                .frame(maxWidth: .infinity)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+
+                        Button(action: performCheckIn) {
+                            Text(hasCheckedInToday ? "비상 정지하기" : canCheckIn ? "지금 출발하기" : "지금 출발하기")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(canCheckIn && !hasCheckedInToday ? Color.white : Color.gray.opacity(0.3))
+                                .foregroundColor(canCheckIn && !hasCheckedInToday ? .black : .secondary)
+                                .cornerRadius(99)
+                        }
+                        .disabled(!canCheckIn || hasCheckedInToday)
+                        .padding(.top, 90)
+                        .padding(.horizontal, 16)
+                    }
+                }
+            }
+            .scrollIndicators(.hidden)
+            .safeAreaPadding(.bottom, 36)
+            .onAppear {
+                let currentStreak = calculateCurrentStreak()
+                trainTicketViewModel.sleepCount = currentStreak
+            }
+            .task {
+                if !authManager.isAuthorized {
+                    authManager.requestAuthorization()
+                }
+            }
+            .onChange(of: trainTicketViewModel.remainingTimeText) { _ in
+                hasCheckedInToday = false
+                todayCheckInTime = nil
+                let currentStreak = calculateCurrentStreak()
+                trainTicketViewModel.sleepCount = currentStreak
+            }
+            .onChange(of: trainTicketViewModel.startTimeText) { _ in
+                // TODO: 추가 동기화가 필요하면 구현, 아니면 제거
+            }
+            .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
+                // TODO: 주기적으로 반영할 상태가 없으면 제거
+            }
+            .background {
+                BackgroundGradientLayer()
+            }
+            .tabItem {
+                Label("비행", systemImage: "airplane")
+            }
+            
+            StreakView()
+                .tabItem {
+                    Label("기록", systemImage: "bed.double.fill")
                 }
 
-                Spacer(minLength: 0)
-            }
-            .padding(.top, 24)
-        }
-        .scrollIndicators(.hidden)
-        .onAppear {
-            let currentStreak = calculateCurrentStreak()
-            trainTicketViewModel.sleepCount = currentStreak
-        }
-        .task {
-            if !authManager.isAuthorized {
-                authManager.requestAuthorization()
-            }
-        }
-        .onChange(of: trainTicketViewModel.remainingTimeText) { _ in
-            hasCheckedInToday = false
-            todayCheckInTime = nil
-            let currentStreak = calculateCurrentStreak()
-            trainTicketViewModel.sleepCount = currentStreak
-        }
-        .onChange(of: trainTicketViewModel.startTimeText) { _ in
-            // TODO: 추가 동기화가 필요하면 구현, 아니면 제거
-        }
-        .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
-            // TODO: 주기적으로 반영할 상태가 없으면 제거
-        }
-        // 화면 전체 배경: Figma 그라디언트
-        .background {
-            backgroundGradientLayer
+            // 설정 탭
+            SettingsView()
+                .tabItem {
+                    Label("설정", systemImage: "ellipsis")
+                }
         }
     }
 }
@@ -463,55 +514,38 @@ struct StreakWeekView: View {
 
     @State private var currentWeekOffset = 0
     
-    private let trackHeight: CGFloat = 4
-    private let trainSize: CGFloat = 32
+    // 오늘 요일 인덱스 (월=0 ... 일=6) - 헤더 강조는 현재 페이지와 무관하게 유지
+    private var todayWeekdayHeaderIndex: Int {
+        let weekday = Calendar.current.component(.weekday, from: Date())
+        return (weekday + 5) % 7
+    }
     
     var body: some View {
-        VStack(spacing: 18) {
-            
-            GeometryReader { geo in
-                let totalWidth: CGFloat = geo.size.width
-                let currentWeek: [StreakDay] = weekGroups.indices.contains(currentWeekOffset) ? weekGroups[currentWeekOffset] : []
-                let progressInfo = calculateProgress(for: currentWeek)
-                let progressWidth: CGFloat = totalWidth * progressInfo.progress
-                let trackVerticalCenter: CGFloat = trainSize * 0.9
-                
-                ZStack(alignment: .topLeading) {
-                    RoundedRectangle(cornerRadius: trackHeight / 2)
-                        .fill(Color.secondary.opacity(0.2))
-                        .frame(width: totalWidth, height: trackHeight)
-                        .offset(x: 0, y: trackVerticalCenter)
-                    
-                    RoundedRectangle(cornerRadius: trackHeight / 2)
-                        .fill(Color.secondary.opacity(0.7))
-                        .frame(width: max(progressWidth, 0), height: trackHeight)
-                        .offset(x: 0, y: trackVerticalCenter)
-                    
-                    Image(systemName: "train.side.front.car")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: trainSize, height: trainSize)
-                        .foregroundColor(.white)
-                        .offset(x: max(progressWidth - trainSize / 2, 0), y: 0)
-                        .accessibilityHidden(true)
-                }
-            }
-            .frame(height: trainSize + 8)
-            
-            
+        VStack(spacing: 5) {
+            // 요일 헤더: 오늘 요일에 회색 원 강조 (페이징과 무관하게 항상 같은 요일에 표시)
             HStack(spacing: 0) {
-                ForEach(["M", "T", "W", "T", "F", "S", "S"], id: \.self) { weekday in
-                    Text(weekday)
-                        .font(.system(size: 14))
-                        .fontWeight(.medium)
-                        .foregroundColor(.white.opacity(0.7))
-                        .frame(maxWidth: .infinity)
+                let weekdays = ["M", "T", "W", "T", "F", "S", "S"]
+                ForEach(Array(weekdays.enumerated()), id: \.offset) { index, weekday in
+                    let isToday = index == todayWeekdayHeaderIndex
+                    ZStack {
+                        if isToday {
+                            Circle()
+                                .fill(Color.white.opacity(0.15))
+                                .frame(width: 22, height: 22)
+                        }
+                        Text(weekday)
+                            .font(.system(size: 14))
+                            .fontWeight(.medium)
+                            .foregroundColor(isToday ? .white : .white.opacity(0.7))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 24)
                 }
             }
             
-            
+            // 스크롤 가능한 날짜와 상태 (주 단위 페이징)
             TabView(selection: $currentWeekOffset) {
-                ForEach(Array(weekGroups.enumerated()), id: \.offset) { weekIndex, week in
+                ForEach(Array(visibleWeekGroups.enumerated()), id: \.offset) { weekIndex, week in
                     HStack(spacing: 0) {
                         ForEach(week) { day in
                             DayCellView(
@@ -535,13 +569,11 @@ struct StreakWeekView: View {
         }
     }
     
-    
     private var todayWeekIndex: Int {
-        weekGroups.firstIndex { week in
+        visibleWeekGroups.firstIndex { week in
             week.contains { $0.isToday }
         } ?? 0
     }
-    
     
     private var weekGroups: [[StreakDay]] {
         stride(from: 0, to: days.count, by: 7).map { startIndex in
@@ -554,8 +586,12 @@ struct StreakWeekView: View {
             return week
         }
     }
-
     
+    // 미래 주를 제외한 실제 표시용 주 배열
+    private var visibleWeekGroups: [[StreakDay]] {
+        weekGroups.filter { !isFutureWeek($0) }
+    }
+
     private func calculateProgress(for week: [StreakDay]) -> (progress: CGFloat, todayIndex: Int) {
         let realDays = week.filter { $0.date != Date.distantPast }
         guard !realDays.isEmpty else { return (0, 0) }
@@ -571,6 +607,23 @@ struct StreakWeekView: View {
                 return (0, 0)
             }
         }
+    }
+    
+    // 해당 주가 "미래 주(오늘 이후만 존재)"인지 판별
+    private func isFutureWeek(_ week: [StreakDay]) -> Bool {
+        let calendar = Calendar.current
+        let todayStart = calendar.startOfDay(for: Date())
+        let realDays = week.filter { $0.date != Date.distantPast }
+        guard !realDays.isEmpty else { return false }
+        
+        // 오늘을 포함하면 미래 주가 아님
+        if realDays.contains(where: { calendar.isDateInToday($0.date) }) {
+            return false
+        }
+        
+        // 주 내 가장 이른 날짜가 오늘 이후면 "미래 주"
+        let earliest = realDays.map { calendar.startOfDay(for: $0.date) }.min()!
+        return earliest > todayStart
     }
 }
 
@@ -662,5 +715,30 @@ private struct DayCellView: View {
                 .fill(Color.secondary.opacity(0.4))
                 .frame(width: 35, height: 35)
         }
+    }
+}
+
+
+// MARK: - 설정 화면 Placeholder
+struct SettingsView: View {
+    var body: some View {
+        Text("설정 화면")
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background {
+                BackgroundGradientLayer()
+            }
+    }
+}
+
+
+struct StreakView: View {
+    var body: some View {
+        Text("기록 화면")
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background {
+                BackgroundGradientLayer()
+            }
     }
 }
