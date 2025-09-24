@@ -62,6 +62,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Core/enum/JourneyStatus.swift,
+				Resources/Sleeptrain.icon,
 			);
 			target = ED8CF2152E81A90500EAFF94 /* SleepTrainWidgetExtension */;
 		};
