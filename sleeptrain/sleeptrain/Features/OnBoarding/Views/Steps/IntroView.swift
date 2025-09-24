@@ -36,6 +36,7 @@ struct IntroView: View {
 
             Spacer(minLength: 0)
         }
+        .ignoresSafeArea(.all, edges: .top)
         .safeAreaInset(edge: .bottom) {
             PrimaryButton(buttonText: "다음", action: { onNext() })
         }
