@@ -10,7 +10,8 @@ import Foundation
 
 struct HomeView: View {
     @EnvironmentObject var authManager: AuthorizationManager
-    @EnvironmentObject var screenTimeManager: ScreenTimeManager
+    @StateObject var screenTimeManager =  ScreenTimeManager()
+    @StateObject private var nfcScanManager = NFCManager()
 
     @StateObject private var trainTicketViewModel = TrainTicketViewModel()
     @StateObject private var homeViewModel = HomeViewModel()
