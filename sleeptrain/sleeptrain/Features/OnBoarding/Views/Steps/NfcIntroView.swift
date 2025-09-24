@@ -16,18 +16,22 @@ struct NfcIntro: View {
     @State private var isImageVisible = false
     var body: some View {
         ZStack {
-            Image("NfcIntro")
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
-                .clipped()
-                .offset(y: 50)
-                .opacity(isImageVisible ? 1 : 0)
-                .onAppear {
-                    withAnimation(.easeIn(duration: 1.0)) {
-                        isImageVisible = true
+            VStack {
+                Image("NfcIntro")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 600)
+                    .ignoresSafeArea()
+                    .clipped()
+                    .offset(y: 40)
+                    .opacity(isImageVisible ? 1 : 0)
+                    .onAppear {
+                        withAnimation(.easeIn(duration: 1.0)) {
+                            isImageVisible = true
+                        }
                     }
-                }
+            }.frame(width: 300)
 
             VStack {
                 VStack(spacing: 12) {
@@ -46,7 +50,6 @@ struct NfcIntro: View {
                 Spacer()
 
                 PrimaryButton(buttonText: "다음", action: { onNext() })
-                    .padding(.horizontal, 20)
                     .padding(.bottom, 20)
             }
         }
