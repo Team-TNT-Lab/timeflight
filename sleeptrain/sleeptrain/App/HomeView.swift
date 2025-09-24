@@ -23,6 +23,12 @@ struct HomeView: View {
 //                    Image(systemName: "ellipsis")
 //                    Text("설정")
 //                }
+            Button("알림 설정") {
+                NotificationManager.shared.scheduleNotification(at: Date.now.advanced(by: 5))
+            }
+            .onAppear {
+                NotificationManager.shared.requestAuthorization()
+            }
         }.task {
             if !authManager.isAuthorized {
                 authManager.requestAuthorization()
