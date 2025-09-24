@@ -5,10 +5,15 @@
 //  Created by bishoe01 on 9/24/25.
 //
 
+import SwiftData
 import SwiftUI
 
 struct OnboardingCompleteView: View {
     @State private var isImageVisible: Bool = false
+    @Environment(\.modelContext) private var modelContext
+    @Query var userSettings: [UserSettings]
+    @StateObject private var settingsManager = UserSettingsManager()
+    var onComplete: () -> Void
     var body: some View {
         VStack {
             Spacer()
@@ -26,12 +31,21 @@ struct OnboardingCompleteView: View {
             Spacer()
         }.safeAreaInset(edge: .bottom) {
             PrimaryButton(buttonText: "시작하기") {
-                print("Ho")
+                do {
+                    try settingsManager.onboardingComplete(
+                        context: modelContext,
+                        userSettings: userSettings
+                    )
+                    try modelContext.save()
+                    onComplete()
+                } catch {
+                    print("온보딩여부 저장에러", error)
+                }
             }
         }
     }
 }
 
 #Preview {
-    OnboardingCompleteView()
+    OnboardingCompleteView(onComplete: {})
 }

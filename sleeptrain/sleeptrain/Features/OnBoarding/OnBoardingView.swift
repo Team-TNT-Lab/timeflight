@@ -10,12 +10,13 @@ import SwiftUI
 struct OnBoardingView: View {
     @State private var navigationPath = NavigationPath()
     @State private var currentStep: OnBoardingStep = .welcome
+    var onComplete: () -> Void
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
-            OnBoardingStepView(step: .welcome, navigationPath: self.$navigationPath, currentStep: self.$currentStep)
+            OnBoardingStepView(step: .welcome, navigationPath: self.$navigationPath, currentStep: self.$currentStep, onComplete: onComplete)
                 .navigationDestination(for: OnBoardingStep.self) { step in
-                    OnBoardingStepView(step: step, navigationPath: self.$navigationPath, currentStep: self.$currentStep)
+                    OnBoardingStepView(step: step, navigationPath: self.$navigationPath, currentStep: self.$currentStep, onComplete: onComplete)
                 }
         }
     }
@@ -25,6 +26,7 @@ struct OnBoardingStepView: View {
     let step: OnBoardingStep
     @Binding var navigationPath: NavigationPath
     @Binding var currentStep: OnBoardingStep
+    var onComplete: () -> Void
 
     var body: some View {
         stepContent
@@ -67,11 +69,11 @@ struct OnBoardingStepView: View {
             NfcTagExampleView(next)
 
         case .onBoardingComplete:
-            OnboardingCompleteView()
+            OnboardingCompleteView(onComplete: onComplete)
         }
     }
 }
 
 #Preview {
-    OnBoardingView()
+    OnBoardingView(onComplete: {})
 }

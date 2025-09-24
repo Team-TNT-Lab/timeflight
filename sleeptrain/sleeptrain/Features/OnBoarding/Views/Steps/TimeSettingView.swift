@@ -118,7 +118,7 @@ struct TimeSettingView: View {
             )
             onNext()
         } catch {
-            print("시간 저장 실패: \(error)")
+            print("스케줄저장실패\(error)")
         }
     }
 }

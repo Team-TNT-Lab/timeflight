@@ -5,8 +5,8 @@
 //  Created by bishoe01 on 9/18/25.
 //
 
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 @main
 struct timeflightApp: App {
@@ -14,21 +14,23 @@ struct timeflightApp: App {
     @StateObject private var authManager = AuthorizationManager()
     @StateObject private var screenTimeManager = ScreenTimeManager()
 
+    @State private var isOnboardingCompleted: Bool
+
+    init() {
+        let userSettings = try? ModelContext(ModelContainer(for: UserSettings.self)).fetch(FetchDescriptor<UserSettings>())
+        _isOnboardingCompleted = State(initialValue: userSettings?.first?.isOnboardingCompleted ?? false)
+    }
+
     var body: some Scene {
         WindowGroup {
-            NavigationStack(path: $coordinator.path) {
+            if isOnboardingCompleted {
                 HomeView()
-//                    .navigationDestination(for: Path.self) { path in
-//                        switch path {
-//                        case .timerView:
-//                            TimerView()
-//                        }
-//                    }
+            } else {
+                OnBoardingView(onComplete: { isOnboardingCompleted = true })
             }
         }
         .modelContainer(for: [UserSettings.self])
         .environmentObject(authManager)
         .environmentObject(screenTimeManager)
-//            .environmentObject(coordinator)
     }
 }
