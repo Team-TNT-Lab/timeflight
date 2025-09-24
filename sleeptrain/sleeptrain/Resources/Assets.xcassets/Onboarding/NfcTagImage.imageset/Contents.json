@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "NfcTagImage.png",
+      "filename" : "nfc.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "NfcTagImage 1.png",
+      "filename" : "nfc 1.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "NfcTagImage 2.png",
+      "filename" : "nfc 2.png",
       "idiom" : "universal",
       "scale" : "3x"
     }
