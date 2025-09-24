@@ -17,20 +17,6 @@ struct StreakDay: Identifiable, Hashable {
     var isToday: Bool {
         Calendar.current.isDateInToday(date)
     }
-
-    /// "MON", "TUE" 같은 3글자 대문자 요일 약어
-    var weekdayShortSymbol: String {
-        let calendar = Calendar.current
-        let index = calendar.component(.weekday, from: date) - 1 // 1...7 → 0...6
-        let symbols = calendar.shortWeekdaySymbols // 로케일에 맞는 ["Sun","Mon",...]
-        guard symbols.indices.contains(index) else { return "" }
-        return symbols[index].uppercased()
-    }
-
-    /// "M", "T" 같은 1글자 요일 약어(로케일 기준)
-    var weekdayOneLetterSymbol: String {
-        String(weekdayShortSymbol.prefix(1))
-    }
 }
 
 // MARK: - Mock / Factory
@@ -119,5 +105,126 @@ extension StreakDay {
         adjustedDays.append(contentsOf: allDays)
         
         return adjustedDays
+    }
+}
+
+// MARK: - 체크인 상태 타입
+enum CheckInStatus {
+    case notReached
+    case available
+    case completed
+    case lateCompleted
+    case failed
+    case future
+}
+
+// MARK: - StreakDay + 체크인 상태 로직
+// NOTE: checkInTime은 Mock 데이터용입니다. #if DEBUG로 분리하거나 Mock 전용 파일로 이동 예정.
+extension StreakDay {
+    // 실제 체크인 시간 (Mock 데이터용) - 일관된 데이터를 위해 고정
+    var checkInTime: Date? {
+        // Mock 데이터: 일부 날짜에 체크인 시간 시뮬레이션
+        guard isCompleted else { return nil }
+        
+        let calendar = Calendar.current
+        let trainDepartureTime = calendar.date(bySettingHour: 23, minute: 30, second: 0, of: date)!
+        
+        // 날짜 기반으로 일관된 체크인 시간 생성 (랜덤이 아닌 고정)
+        let dayOfYear = calendar.ordinality(of: .day, in: .year, for: date) ?? 1
+        let checkInScenarios: [TimeInterval] = [
+            -25 * 60,    // 25분 전 (정상)
+            -10 * 60,    // 10분 전 (정상)
+            5 * 60,      // 5분 지연 (정상)
+            20 * 60,     // 20분 지연 (정상)
+            45 * 60,     // 45분 지연 (늦은 체크인)
+            90 * 60,     // 90분 지연 (늦은 체크인)
+            150 * 60     // 150분 지연 (실패)
+        ]
+        
+        // 날짜 기반으로 일관된 인덱스 선택
+        let scenarioIndex = dayOfYear % checkInScenarios.count
+        let selectedOffset = checkInScenarios[scenarioIndex]
+        
+        return calendar.date(byAdding: .second, value: Int(selectedOffset), to: trainDepartureTime)
+    }
+    
+    var trainDepartureTime: Date {
+        let calendar = Calendar.current
+        return calendar.date(bySettingHour: 23, minute: 30, second: 0, of: date) ?? date
+    }
+    
+    /// 현재 시나리오에 따라 해당 날짜의 체크인 상태를 판별
+    func getCheckInStatus(
+        currentRemainingTime: String = "20분",
+        hasCheckedInToday: Bool = true,
+        todayCheckInTime: Date? = nil,
+        departureTimeString: String = "23:30",
+        parseRemainingTime: (String) -> Int?,
+        parseDepartureTime: (String) -> Date
+    ) -> CheckInStatus {
+        let now = Date()
+        let calendar = Calendar.current
+        
+        // 미래 날짜
+        if calendar.startOfDay(for: date) > calendar.startOfDay(for: now) {
+            return .future
+        }
+        
+        // 실제 출발 시간 계산
+        // - 오늘: 현재 티켓의 출발 시각(문자열)을 사용
+        // - 과거: 해당 날짜의 고정 출발 시각(23:30)을 사용하여 '날짜가 다른 문제'를 방지
+        let actualDepartureTime: Date = {
+            if calendar.isDateInToday(date) {
+                return parseDepartureTime(departureTimeString)
+            } else {
+                return trainDepartureTime
+            }
+        }()
+        
+        // 오늘 날짜 처리
+        if calendar.isDateInToday(date) {
+            // 실제 체크인이 되었다면 체크인 시간을 기반으로 상태 결정
+            if hasCheckedInToday, let actualCheckIn = todayCheckInTime {
+                let timeDifference = actualCheckIn.timeIntervalSince(actualDepartureTime)
+                
+                if timeDifference >= -30 * 60 && timeDifference <= 30 * 60 {
+                    return .completed
+                } else if timeDifference > 30 * 60 && timeDifference <= 120 * 60 {
+                    return .lateCompleted
+                } else {
+                    return .failed
+                }
+            }
+            
+            // 아직 체크인 안 했을 때 - 남은 시간 기반
+            guard let remainingMinutes = parseRemainingTime(currentRemainingTime) else {
+                return .notReached
+            }
+            
+            if remainingMinutes > 30 {
+                return .notReached
+            } else if remainingMinutes < 0 && remainingMinutes >= -120 {
+                return .available
+            } else if remainingMinutes >= -30 {
+                return .available
+            } else {
+                return .failed
+            }
+        }
+        
+        // 과거 날짜 - 실제 체크인 시간을 기반으로 상태 결정
+        guard let actualCheckIn = checkInTime else {
+            return .failed
+        }
+        
+        let timeDifference = actualCheckIn.timeIntervalSince(actualDepartureTime)
+        
+        if timeDifference >= -30 * 60 && timeDifference <= 30 * 60 {
+            return .completed
+        } else if timeDifference > 30 * 60 && timeDifference <= 120 * 60 {
+            return .lateCompleted
+        } else {
+            return .failed
+        }
     }
 }
