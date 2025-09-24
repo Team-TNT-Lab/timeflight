@@ -19,26 +19,29 @@ struct IntroView: View {
                 .resizable()
                 .scaledToFill()
                 .frame(maxWidth: .infinity)
-                .frame(height: 500)
+                .frame(height: 550)
                 .clipped()
 
             VStack(alignment: .leading, spacing: 12) {
-                Text("당신은 드림 라인의 기관사입니다. 수면 운행을 준비해볼까요?")
-                    .font(.title2.weight(.semibold))
-                    .multilineTextAlignment(.leading)
+                Text("당신은 드림 라인의 기관사입니다.\n수면 운행을 준비해볼까요?")
+                    .font(.system(size: 23, weight: .semibold))
 
-                Text("목표한 수면 운행 일정에 맞게 출발하면 성공적인 운행을 완료하게 돼요")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                Text("목표한 수면 운행 일정에 맞게 출발하면\n성공적인 운행을 완료하게 돼요")
+                    .font(.system(size: 13, weight: .thin))
             }
-            .padding(.horizontal, 24)
-            .padding(.top, 24)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 16)
+            .padding(.top, 32)
 
             Spacer(minLength: 0)
-        }
-        .ignoresSafeArea(.all, edges: .top)
-        .safeAreaInset(edge: .bottom) {
-            PrimaryButton(buttonText: "다음", action: { onNext() })
-        }
+        }.frame(maxWidth: .infinity)
+            .ignoresSafeArea(.all, edges: .top)
+            .safeAreaInset(edge: .bottom) {
+                PrimaryButton(buttonText: "다음", action: { onNext() })
+            }
     }
+}
+
+#Preview {
+    IntroView { print("HI") }
 }
