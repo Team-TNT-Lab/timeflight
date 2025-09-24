@@ -9,19 +9,6 @@ import ActivityKit
 import WidgetKit
 import SwiftUI
 
-struct SleepTrainWidgetAttributes: ActivityAttributes {
-    public struct ContentState: Codable, Hashable {
-        var actualDepartureTime: Date?
-        var currentTime: Date
-        var status: JourneyStatus
-    }
-
-    var targetDepartureTime: Date
-    var targetArrivalTime: Date
-    var departureDayString: String
-    var arrivalDayString: String
-}
-
 struct SleepTrainWidgetLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: SleepTrainWidgetAttributes.self) { context in
