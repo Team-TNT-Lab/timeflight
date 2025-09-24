@@ -15,6 +15,7 @@ enum OnBoardingStep: Hashable, CaseIterable {
     case appSelection
     case nfcIntro
     case nfcTagExample
+    case onBoardingComplete
 
     var hideBackButton: Bool {
         switch self {

@@ -42,9 +42,13 @@ struct NfcTagExampleView: View {
                         onNext()
                     }
                 }
-                Text("아직 카드가 없어요")
-                    .font(.system(size: 15, weight: .medium))
-                    .opacity(0.5)
+                Button {
+                    onNext()
+                } label: {
+                    Text("아직 카드가 없어요")
+                        .font(.system(size: 15, weight: .medium))
+                        .opacity(0.5)
+                }
             }.padding(.bottom, 20)
         }
     }

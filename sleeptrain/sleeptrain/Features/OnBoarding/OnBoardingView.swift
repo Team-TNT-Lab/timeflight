@@ -65,6 +65,9 @@ struct OnBoardingStepView: View {
 
         case .nfcTagExample:
             NfcTagExampleView(next)
+
+        case .onBoardingComplete:
+            OnboardingCompleteView()
         }
     }
 }
