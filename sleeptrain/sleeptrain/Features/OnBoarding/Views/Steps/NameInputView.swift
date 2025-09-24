@@ -40,6 +40,8 @@ struct NameInputView: View {
             Spacer()
 
             PrimaryButton(buttonText: "다음", action: saveName)
+                .opacity(name.count == 0 ? 0.5 : 1)
+                .disabled(name.count == 0)
         }
         .padding(.bottom, 20)
     }
