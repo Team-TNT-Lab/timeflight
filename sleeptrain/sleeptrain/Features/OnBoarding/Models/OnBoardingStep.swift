@@ -19,7 +19,7 @@ enum OnBoardingStep: Hashable, CaseIterable {
 
     var hideBackButton: Bool {
         switch self {
-        case .welcome, .intro, .nameInput:
+        case .welcome, .intro, .nameInput, .onBoardingComplete:
             return true
         default:
             return false

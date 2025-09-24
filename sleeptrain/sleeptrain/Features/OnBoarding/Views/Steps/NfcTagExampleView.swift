@@ -10,7 +10,7 @@ import SwiftUI
 
 struct NfcTagExampleView: View {
     let onNext: () -> Void
-
+    @State var noCardAlert: Bool = false
     init(_ onNext: @escaping () -> Void) {
         self.onNext = onNext
     }
@@ -43,13 +43,33 @@ struct NfcTagExampleView: View {
                     }
                 }
                 Button {
-                    onNext()
+                    noCardAlert.toggle()
                 } label: {
                     Text("아직 카드가 없어요")
                         .font(.system(size: 15, weight: .medium))
+                        .foregroundStyle(Color.white)
                         .opacity(0.5)
                 }
             }.padding(.bottom, 20)
+        }.alert(isPresented: $noCardAlert) {
+            Alert(
+                title: Text("드림카드 없이 진행")
+                    .font(.system(size: 17, weight: .semibold)),
+                message: Text("카드가 없어도 앱 사용이 가능해요.\n나중에 설정에서 등록할 수 있어요.")
+                    .font(.system(size: 17, weight: .regular)),
+                primaryButton: .default(
+                    Text("진행하기"),
+                    action: {
+                        onNext()
+                    }
+                ),
+                secondaryButton: .cancel(
+                    Text("취소"),
+                    action: {
+                        noCardAlert.toggle()
+                    }
+                )
+            )
         }
     }
 }
