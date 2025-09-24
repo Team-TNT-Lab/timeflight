@@ -5,7 +5,7 @@ final class HomeViewModel: ObservableObject {
     @Published var weekDays: [StreakDay] = StreakDay.extendedStreakMock()
     @Published var hasCheckedInToday: Bool = false
     @Published var todayCheckInTime: Date?
-    
+
     // 시나리오(남은 시간/출발 시간) 변경 시 체크인 상태 초기화
     func resetForScenarioChange() {
         hasCheckedInToday = false
@@ -17,7 +17,29 @@ final class HomeViewModel: ObservableObject {
         hasCheckedInToday = false
         todayCheckInTime = nil
     }
-    
+
+    // 2시간 이상 지연 시 스트릭 초기화 체크 및 sleepCount 업데이트
+    func checkAndHandleFailedState(
+        remainingTimeText: String,
+        startTimeText: String,
+        updateSleepCount: (Int) -> Void
+    ) {
+        guard let remainingMinutes = parseRemainingTimeToMinutes(remainingTimeText) else { return }
+        
+        // 2시간(120분) 이상 지연 시 즉시 sleepCount를 0으로 초기화
+        if remainingMinutes <= -120 {
+            updateSleepCount(0)
+            return
+        }
+        
+        // 일반적인 상황에서는 현재 스트릭 계산
+        let currentStreak = calculateCurrentStreak(
+            remainingTimeText: remainingTimeText,
+            startTimeText: startTimeText
+        )
+        updateSleepCount(currentStreak)
+    }
+
     // 체크인 수행: 외부에서 타임 문자열을 넘기고, sleepCount 갱신은 콜백으로 처리
     func performCheckIn(
         remainingTimeText: String,
@@ -88,7 +110,7 @@ final class HomeViewModel: ObservableObject {
             updateSleepCount(recalculated)
         }
     }
-    
+
     // 오늘 상태에 따라 수면 스트릭 카운트를 계산해 반환(변경 없으면 nil)
     func updateSleepCountBasedOnStreak(
         remainingTimeText: String,
@@ -119,7 +141,7 @@ final class HomeViewModel: ObservableObject {
         }
         return nil
     }
-    
+
     /// 연속 체크인 성공 일수 계산
     func calculateCurrentStreak(
         remainingTimeText: String,
@@ -160,7 +182,7 @@ final class HomeViewModel: ObservableObject {
         }
         return streak
     }
-    
+
     /// 남은 시간과 출발 시간을 기반으로 현재 시나리오의 체크인 시간 계산(데모용)
     /// - remainingTimeText 파싱 결과를 사용하여 일반화
     func calculateCheckInTimeForCurrentScenario(
@@ -185,29 +207,37 @@ final class HomeViewModel: ObservableObject {
         formatter.dateFormat = "HH:mm"
         
         guard let endTime = formatter.date(from: endTimeText) else { return nil }
-        
+
         var calendar = Calendar.current
         let startComponents = calendar.dateComponents([.year, .month, .day], from: startDate)
         let endComponents = calendar.dateComponents([.hour, .minute], from: endTime)
-        
+
         var combinedComponents = DateComponents()
         combinedComponents.year = startComponents.year
         combinedComponents.month = startComponents.month
         combinedComponents.day = startComponents.day
         combinedComponents.hour = endComponents.hour
         combinedComponents.minute = endComponents.minute
-        
+
         guard var endDate = calendar.date(from: combinedComponents) else { return nil }
-        
+
         if endDate < startDate {
             endDate = calendar.date(byAdding: .day, value: 1, to: endDate)!
         }
-        
+
         let diff = calendar.dateComponents([.hour, .minute], from: startDate, to: endDate)
         let hours = diff.hour ?? 0
         let minutes = diff.minute ?? 0
-        
-        return "\(hours)시간 \(minutes)분"
+
+        if hours > 0 && minutes > 0 {
+            return "\(hours)시간 \(minutes)분"
+        } else if hours > 0 {
+            return "\(hours)시간"
+        } else if minutes > 0 {
+            return "\(minutes)분"
+        } else {
+            return "0분"
+        }
     }
     /// 출발 시각 기준 체크인 시각과 도착 시각 문자열을 받아 남은 시간을 계산
     func calculateRemainingTimeFromCheckInToEnd(
@@ -219,16 +249,25 @@ final class HomeViewModel: ObservableObject {
             remainingTimeText: remainingTimeText,
             startTimeText: startTimeText
         )
-        
+
         return calculateRemainingTime(from: checkInTime, to: endTimeText)
     }
     
-    /// 티켓 카드/출발 시각 변경 등으로 스트릭 동기화
+    /// 티켓 카드/출발 시각 변경 등으로 스트릭 동기화 (2시간 이상 지연 시 즉시 0 반환)
     func syncCurrentStreak(
         remainingTimeText: String,
         startTimeText: String
     ) -> Int {
-        calculateCurrentStreak(
+        guard let remainingMinutes = parseRemainingTimeToMinutes(remainingTimeText) else {
+            return calculateCurrentStreak(remainingTimeText: remainingTimeText, startTimeText: startTimeText)
+        }
+        
+        // 2시간(120분) 이상 지연 시 즉시 0 반환
+        if remainingMinutes <= -120 {
+            return 0
+        }
+        
+        return calculateCurrentStreak(
             remainingTimeText: remainingTimeText,
             startTimeText: startTimeText
         )
@@ -267,6 +306,49 @@ final class HomeViewModel: ObservableObject {
         let hours = diff.hour ?? 0
         let minutes = diff.minute ?? 0
         
-        return "\(hours)시간 \(minutes)분"
+        if hours > 0 && minutes > 0 {
+            return "\(hours)시간 \(minutes)분"
+        } else if hours > 0 {
+            return "\(hours)시간"
+        } else if minutes > 0 {
+            return "\(minutes)분"
+        } else {
+            return "0분"
+        }
     }
+//    /// 목데이터 기준 특정 시각부터 출발 시각까지 남은 시간을 계산
+//    func calculateMockRemainingTimeToDeparture(from referenceDate: Date, startTimeText: String) -> String {
+//        let formatter = DateFormatter()
+//        formatter.dateFormat = "HH:mm"
+//
+//        guard let departureTimeToday = formatter.date(from: startTimeText) else {
+//            return ""
+//        }
+//
+//        let calendar = Calendar.current
+//        let referenceComponents = calendar.dateComponents([.year, .month, .day], from: referenceDate)
+//        let departureComponents = calendar.dateComponents([.hour, .minute], from: departureTimeToday)
+//
+//        var combinedComponents = DateComponents()
+//        combinedComponents.year = referenceComponents.year
+//        combinedComponents.month = referenceComponents.month
+//        combinedComponents.day = referenceComponents.day
+//        combinedComponents.hour = departureComponents.hour
+//        combinedComponents.minute = departureComponents.minute
+//
+//        guard var departureDate = calendar.date(from: combinedComponents) else {
+//            return ""
+//        }
+//
+//        let maxDelay = departureDate.addingTimeInterval(2 * 3600)
+//        if referenceDate > maxDelay {
+//            departureDate = calendar.date(byAdding: .day, value: 1, to: departureDate)!
+//        }
+//
+//        let diff = calendar.dateComponents([.hour, .minute], from: referenceDate, to: departureDate)
+//        let hours = diff.hour ?? 0
+//        let minutes = diff.minute ?? 0
+//
+//        return "\(hours)시간 \(minutes)분"
+//    }
 }

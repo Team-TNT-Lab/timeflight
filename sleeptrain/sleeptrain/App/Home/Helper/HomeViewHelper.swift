@@ -166,4 +166,49 @@ internal func canCheckIn(remainingTimeText: String, hasCheckedInToday: Bool) -> 
     return (remainingMinutes <= 30 || remainingMinutes < 0) && !hasCheckedInToday
 }
 
+/// Calculate remaining time from current time to wake-up time
+internal func calculateRemainingTimeToWakeUp(endTimeText: String) -> String {
+    let now = Date()
+    let formatter = DateFormatter()
+    formatter.dateFormat = "HH:mm"
+    
+    guard let wakeUpTimeToday = formatter.date(from: endTimeText) else {
+        return "계산 중..."
+    }
+    
+    let calendar = Calendar.current
+    let currentComponents = calendar.dateComponents([.year, .month, .day], from: now)
+    let wakeUpComponents = calendar.dateComponents([.hour, .minute], from: wakeUpTimeToday)
+    
+    var combinedComponents = DateComponents()
+    combinedComponents.year = currentComponents.year
+    combinedComponents.month = currentComponents.month
+    combinedComponents.day = currentComponents.day
+    combinedComponents.hour = wakeUpComponents.hour
+    combinedComponents.minute = wakeUpComponents.minute
+    
+    guard var wakeUpDate = calendar.date(from: combinedComponents) else {
+        return "계산 중..."
+    }
+    
+    // 기상 시간이 현재 시간보다 이전이면 다음 날로 설정
+    if wakeUpDate <= now {
+        wakeUpDate = calendar.date(byAdding: .day, value: 1, to: wakeUpDate) ?? wakeUpDate
+    }
+    
+    let diff = calendar.dateComponents([.hour, .minute], from: now, to: wakeUpDate)
+    let hours = diff.hour ?? 0
+    let minutes = diff.minute ?? 0
+    
+    if hours > 0 && minutes > 0 {
+        return "\(hours)시간 \(minutes)분"
+    } else if hours > 0 {
+        return "\(hours)시간"
+    } else if minutes > 0 {
+        return "\(minutes)분"
+    } else {
+        return "곧"
+    }
+}
+
 

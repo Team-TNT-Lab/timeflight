@@ -13,23 +13,29 @@ import SwiftUI
 struct CheckInBannerView: View {
     let remainingTimeText: String
     let startTimeText: String
+    let endTimeText: String
     let hasCheckedInToday: Bool
     let performCheckIn: () -> Void
     
     @StateObject private var nfcScanManager = NFCManager()
     
+    // 현재 시간부터 기상 시간까지 남은 시간 계산
+    private var timeUntilWakeUp: String {
+        calculateRemainingTimeToWakeUp(endTimeText: endTimeText)
+    }
+    
     var body: some View {
         VStack(spacing: 4) {
             // 이동 중(=오늘 체크인 완료)이면 도착 안내 문구로 전환
             if hasCheckedInToday {
-                // infoBannerText
-                Text("열차 도착까지 \(remainingTimeText) 남았어요")
+                // infoBannerText - 현재 시간부터 기상 시간까지 남은 시간 계산
+                Text("열차 도착까지 \(timeUntilWakeUp) 남았어요")
                     .font(.system(size: 24, weight: .bold))
                     .foregroundColor(.white)
                     .multilineTextAlignment(.center)
                     .lineSpacing(9.6)
                     .frame(maxWidth: .infinity)
-                    .padding(.top, 90)
+                    .padding(.top, 130) // 운행 중일 때만 TicketView 하단과 160 간격
                 
                 // subText
                 Text("잠이 오지 않으면 눈을 감고만 있어도 괜찮아요")
@@ -86,7 +92,7 @@ struct CheckInBannerView: View {
                 remainingTimeText: remainingTimeText,
                 hasCheckedInToday: hasCheckedInToday
             ) || hasCheckedInToday)
-            .padding(.top, 90)
+            .padding(.top, hasCheckedInToday ? 200 : 90)
             .padding(.horizontal, 16)
         }
     }

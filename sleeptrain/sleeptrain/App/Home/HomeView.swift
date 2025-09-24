@@ -42,6 +42,7 @@ struct HomeView: View {
                     CheckInBannerView(
                         remainingTimeText: trainTicketViewModel.remainingTimeText,
                         startTimeText: trainTicketViewModel.startTimeText,
+                        endTimeText: trainTicketViewModel.endTimeText,
                         hasCheckedInToday: homeViewModel.hasCheckedInToday,
                         performCheckIn: {
                             homeViewModel.performCheckIn(
@@ -62,6 +63,15 @@ struct HomeView: View {
                     startTimeText: trainTicketViewModel.startTimeText
                 )
                 trainTicketViewModel.sleepCount = current
+            }
+            .onReceive(Timer.publish(every: 60, on: .main, in: .common).autoconnect()) { _ in
+                // 매분마다 2시간 이상 지연 상태 체크 및 sleepCount 업데이트
+                homeViewModel.checkAndHandleFailedState(
+                    remainingTimeText: trainTicketViewModel.remainingTimeText,
+                    startTimeText: trainTicketViewModel.startTimeText
+                ) { newSleepCount in
+                    trainTicketViewModel.sleepCount = newSleepCount
+                }
             }
             .task {
                 if !authManager.isAuthorized {
