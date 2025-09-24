@@ -15,20 +15,21 @@ struct NfcIntro: View {
 
     @State private var isImageVisible = false
     var body: some View {
-        VStack {
-            ZStack(alignment: .top) {
-                Image("NfcIntro")
-                    .resizable()
-                    .scaledToFill()
-                    .ignoresSafeArea()
-                    .clipped()
-                    .offset(y: 80)
-                    .opacity(isImageVisible ? 1 : 0)
-                    .onAppear {
-                        withAnimation(.easeIn(duration: 1.0)) {
-                            isImageVisible = true
-                        }
+        ZStack {
+            Image("NfcIntro")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
+                .clipped()
+                .offset(y: 50)
+                .opacity(isImageVisible ? 1 : 0)
+                .onAppear {
+                    withAnimation(.easeIn(duration: 1.0)) {
+                        isImageVisible = true
                     }
+                }
+
+            VStack {
                 VStack(spacing: 12) {
                     Text("드림 카드에 아이폰을 태그하면\n수면 운행이 시작돼요")
                         .font(.system(size: 23, weight: .semibold))
@@ -38,11 +39,16 @@ struct NfcIntro: View {
                     Text("수면 비행이 시작되면 선택한 앱이 잠기게 돼요.\n잠금은 설정한 기상 시간에 해제되거나 수동으로 풀 수 있어요.")
                         .font(.system(size: 13, weight: .thin))
                         .multilineTextAlignment(.center)
+                        .foregroundStyle(.white)
                 }
-                .padding(.top, 60)
+                .padding(.top, 40)
+
+                Spacer()
+
+                PrimaryButton(buttonText: "다음", action: { onNext() })
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 20)
             }
-        }.safeAreaInset(edge: .bottom) {
-            PrimaryButton(buttonText: "다음", action: { onNext() })
         }
     }
 }
