@@ -15,7 +15,7 @@ struct AppSelectionView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var userSettings: [UserSettings]
     @StateObject private var userSettingsManager = UserSettingsManager()
-
+    @StateObject private var authManager = AuthorizationManager()
     @EnvironmentObject var screenTimeManager: ScreenTimeManager
 
     init(_ onNext: @escaping () -> Void) {
@@ -31,6 +31,10 @@ struct AppSelectionView: View {
             }
             .onAppear {
                 loadExistingSelection()
+            }.task {
+                if !authManager.isAuthorized {
+                    authManager.requestAuthorization()
+                }
             }
     }
 
