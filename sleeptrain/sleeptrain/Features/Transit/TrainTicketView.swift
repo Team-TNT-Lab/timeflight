@@ -119,6 +119,11 @@ class TrainTicketViewModel: ObservableObject {
     @Published var endDayText = "TUE"
     @Published var remainingTimeText = "1시간"
     
+    // 도착 시간을 Date 객체로 반환하는 계산 속성
+    var targetArrivalTime: Date {
+        DateFormatting.dateFromTimeString(endTimeText) ?? Date()
+    }
+    
     // 목업 데이터
     private let mockSchedules = [
         MockSchedule(startTime: "23:30", endTime: "07:30", startDay: "MON", endDay: "TUE", remainingTime: "1시간", sleepCount: 32),

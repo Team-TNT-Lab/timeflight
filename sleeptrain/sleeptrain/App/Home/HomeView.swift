@@ -33,7 +33,10 @@ struct HomeView: View {
                             homeViewModel.resetTodayCheckIn()
                         }
                     
-                    streakSection
+                    // hasCheckedInToday가 false일 때만 streakSection 표시
+                    if !homeViewModel.hasCheckedInToday {
+                        streakSection
+                    }
                     
 
                     CheckInBannerView(

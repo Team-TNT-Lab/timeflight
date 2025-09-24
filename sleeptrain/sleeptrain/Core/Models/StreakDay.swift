@@ -155,14 +155,15 @@ extension StreakDay {
     
     /// 현재 시나리오에 따라 해당 날짜의 체크인 상태를 판별
     func getCheckInStatus(
+        currentTime: Date = Date(),
         currentRemainingTime: String = "20분",
         hasCheckedInToday: Bool = true,
         todayCheckInTime: Date? = nil,
         departureTimeString: String = "23:30",
         parseRemainingTime: (String) -> Int?,
-        parseDepartureTime: (String) -> Date
+        parseDepartureTime: (String, Date) -> Date
     ) -> CheckInStatus {
-        let now = Date()
+        let now = currentTime
         let calendar = Calendar.current
         
         // 미래 날짜
@@ -171,11 +172,11 @@ extension StreakDay {
         }
         
         // 실제 출발 시간 계산
-        // - 오늘: 현재 티켓의 출발 시각(문자열)을 사용
-        // - 과거: 해당 날짜의 고정 출발 시각(23:30)을 사용하여 '날짜가 다른 문제'를 방지
+        // - 오늘: 현재 시간을 기준으로 실제 출발 시각을 계산
+        // - 과거: 해당 날짜의 고정 출발 시각(23:30)을 사용
         let actualDepartureTime: Date = {
             if calendar.isDateInToday(date) {
-                return parseDepartureTime(departureTimeString)
+                return parseDepartureTime(departureTimeString, now)
             } else {
                 return trainDepartureTime
             }
@@ -201,7 +202,10 @@ extension StreakDay {
                 return .notReached
             }
             
-            if remainingMinutes > 30 {
+            // 2시간 이상 지연 시 실패로 처리
+            if remainingMinutes <= -120 {
+                return .failed
+            } else if remainingMinutes > 30 {
                 return .notReached
             } else if remainingMinutes < 0 && remainingMinutes >= -120 {
                 return .available
@@ -226,5 +230,86 @@ extension StreakDay {
         } else {
             return .failed
         }
+    }
+}
+
+// MARK: - 실제 데이터 사용을 위한 헬퍼 함수 예시
+extension StreakDay {
+    /// 현재 시간을 기준으로 특정 출발 시각까지 남은 시간을 계산
+    static func calculateRemainingTimeToDeparture(from currentTime: Date, departureTimeString: String) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        
+        guard let departureTimeToday = formatter.date(from: departureTimeString) else {
+            return ""
+        }
+        
+        let calendar = Calendar.current
+        let currentComponents = calendar.dateComponents([.year, .month, .day], from: currentTime)
+        let departureComponents = calendar.dateComponents([.hour, .minute], from: departureTimeToday)
+        
+        var combinedComponents = DateComponents()
+        combinedComponents.year = currentComponents.year
+        combinedComponents.month = currentComponents.month
+        combinedComponents.day = currentComponents.day
+        combinedComponents.hour = departureComponents.hour
+        combinedComponents.minute = departureComponents.minute
+        
+        guard var departureDate = calendar.date(from: combinedComponents) else {
+            return ""
+        }
+        
+        // 출발 시간이 이미 지났고 2시간 이내라면 다음 날로 설정
+        let maxDelay = departureDate.addingTimeInterval(2 * 3600)
+        if currentTime > maxDelay {
+            departureDate = calendar.date(byAdding: .day, value: 1, to: departureDate) ?? departureDate
+        }
+        
+        let diff = calendar.dateComponents([.hour, .minute], from: currentTime, to: departureDate)
+        let hours = diff.hour ?? 0
+        let minutes = diff.minute ?? 0
+        
+        if hours > 0 {
+            return "\(hours)시간 \(minutes)분"
+        } else if minutes > 0 {
+            return "\(minutes)분"
+        } else if minutes < 0 {
+            return "\(abs(minutes))분 지연"
+        } else {
+            return "출발 시간"
+        }
+    }
+    
+    /// 실제 데이터 사용 시를 위한 parseDepartureTime 클로저 예시
+    static let realDataParseDepartureTime: (String, Date) -> Date = { departureTimeString, currentTime in
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        
+        guard let departureTimeToday = formatter.date(from: departureTimeString) else {
+            return currentTime
+        }
+        
+        let calendar = Calendar.current
+        let currentComponents = calendar.dateComponents([.year, .month, .day], from: currentTime)
+        let departureComponents = calendar.dateComponents([.hour, .minute], from: departureTimeToday)
+        
+        var combinedComponents = DateComponents()
+        combinedComponents.year = currentComponents.year
+        combinedComponents.month = currentComponents.month
+        combinedComponents.day = currentComponents.day
+        combinedComponents.hour = departureComponents.hour
+        combinedComponents.minute = departureComponents.minute
+        
+        guard var departureDate = calendar.date(from: combinedComponents) else {
+            return currentTime
+        }
+        
+        // 출발 시간이 이미 지났고 2시간 이내라면 다음 날로 설정
+        let maxDelay = departureDate.addingTimeInterval(2 * 3600)
+        if currentTime > maxDelay {
+            departureDate = calendar.date(byAdding: .day, value: 1, to: departureDate) ?? departureDate
+        }
+        
+        return departureDate
     }
 }

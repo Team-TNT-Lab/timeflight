@@ -86,14 +86,33 @@ internal func formatDuration(minutes: Int) -> String {
 }
 
 /// Calculate minutes until next sleep time (departure time next day) based on a start time string "HH:mm"
+//internal func minutesUntilNextSleepTime(startTimeText: String) -> Int {
+//    let now = Date()
+//    let calendar = Calendar.current
+//    let todayStart = parseDepartureTime(startTimeText)
+//    let nextDayStart = calendar.date(byAdding: .day, value: 1, to: todayStart) ?? todayStart
+//    let diff = Int(nextDayStart.timeIntervalSince(now) / 60)
+//    return max(diff, 0)
+//}
+
 internal func minutesUntilNextSleepTime(startTimeText: String) -> Int {
     let now = Date()
     let calendar = Calendar.current
+
     let todayStart = parseDepartureTime(startTimeText)
-    let nextDayStart = calendar.date(byAdding: .day, value: 1, to: todayStart) ?? todayStart
-    let diff = Int(nextDayStart.timeIntervalSince(now) / 60)
+
+    let nextStartTime: Date
+    if todayStart > now {
+        nextStartTime = todayStart // 오늘 밤 수면 시간이 아직 남아 있다면
+    } else {
+        // 오늘 시간은 이미 지났으므로, 다음 날로 이동
+        nextStartTime = calendar.date(byAdding: .day, value: 1, to: todayStart) ?? todayStart
+    }
+
+    let diff = Int(nextStartTime.timeIntervalSince(now) / 60)
     return max(diff, 0)
 }
+
 
 /// Banner main text logic, extracted from HomeView
 internal func makeInfoBannerText(remainingTimeText: String, startTimeText: String) -> String {
@@ -138,5 +157,13 @@ internal func canCheckIn(remainingTimeText: String, hasCheckedInToday: Bool) -> 
     guard let remainingMinutes = parseRemainingTimeToMinutes(remainingTimeText) else {
         return false
     }
+    
+    // 지연시간이 2시간(120분)을 넘으면 체크인 불가
+    if remainingMinutes <= -120 {
+        return false
+    }
+    
     return (remainingMinutes <= 30 || remainingMinutes < 0) && !hasCheckedInToday
 }
+
+

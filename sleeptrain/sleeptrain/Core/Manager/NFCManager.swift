@@ -16,6 +16,8 @@ class NFCManager: NSObject, ObservableObject, NFCNDEFReaderSessionDelegate {
     func startNFCScan(alertMessage: String, completion: @escaping (String?) -> Void) {
         guard NFCNDEFReaderSession.readingAvailable else {
             nfcMessage = NfcError.deviceNotSupported.localizedDescription
+            // 스캔 불가 환경(시뮬레이터 등)에서는 실패 콜백
+            completion(nil)
             return
         }
 
@@ -35,15 +37,20 @@ class NFCManager: NSObject, ObservableObject, NFCNDEFReaderSessionDelegate {
         else {
             DispatchQueue.main.async {
                 self.nfcMessage = NfcError.invalidMessage.localizedDescription
+                self.completion?(nil)
             }
+            session.invalidate()
             return
         }
 
         let messageText = String(data: record.payload, encoding: .utf8) ?? NfcError.invalidMessage.localizedDescription
         DispatchQueue.main.async {
             self.nfcMessage = messageText
+            // 특정 페이로드만 성공으로 간주
             if messageText == "\u{02}enwake" {
                 self.completion?(messageText)
+            } else {
+                self.completion?(nil)
             }
         }
         session.invalidate()
@@ -58,6 +65,9 @@ class NFCManager: NSObject, ObservableObject, NFCNDEFReaderSessionDelegate {
                     self.nfcMessage = "스캔취소"
                 }
             }
+            // 취소/실패 모두 상위에 알림
+            self.completion?(nil)
         }
     }
 }
+

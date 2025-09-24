@@ -47,7 +47,7 @@ struct DayCellView: View {
             todayCheckInTime: todayCheckInTime,
             departureTimeString: departureTimeString,
             parseRemainingTime: parseRemainingTimeToMinutes,
-            parseDepartureTime: parseDepartureTime
+            parseDepartureTime: { timeString, _ in parseDepartureTime(timeString) }
         )
     }
     
