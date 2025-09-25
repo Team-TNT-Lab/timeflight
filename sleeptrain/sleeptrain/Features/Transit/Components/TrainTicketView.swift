@@ -130,7 +130,7 @@ struct TrainTicketView: View {
             let currentStreak = stats.first?.streak ?? 0
             viewModel.setSleepCount(currentStreak)
         }
-        .onChange(of: scheduleSignature) { _ in
+        .onChange(of: scheduleSignature) { _, _ in
             // 설정 변경 시 실데이터 재적용
             if let settings = userSettings.first {
                 viewModel.setRealSchedule(
@@ -139,7 +139,7 @@ struct TrainTicketView: View {
                 )
             }
         }
-        .onChange(of: streakSignature) { _ in
+        .onChange(of: streakSignature) { _, _ in
             // Stats 변경 시 카운트 동기화
             let currentStreak = stats.first?.streak ?? 0
             viewModel.setSleepCount(currentStreak)

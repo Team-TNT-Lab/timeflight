@@ -75,16 +75,32 @@ struct HomeView: View {
                     authManager.requestAuthorization()
                 }
             }
-            // Mock 기반 동기화는 제거합니다. Stats가 단일 소스이며,
-            // 체크인/2시간 초과 로직에서 Stats가 갱신됩니다.
+            .onChange(of: trainTicketViewModel.remainingTimeText) { _, _ in
+                // 시나리오 변경 시 오늘 체크인 초기화 및 스트릭 재계산
+                homeViewModel.resetForScenarioChange()
+                let current = homeViewModel.syncCurrentStreak(
+                    remainingTimeText: trainTicketViewModel.remainingTimeText,
+                    startTimeText: trainTicketViewModel.startTimeText
+                )
+                trainTicketViewModel.sleepCount = current
+            }
+            .onChange(of: trainTicketViewModel.startTimeText) { _, _ in
+                // 출발 시각 변경 시 스트릭/상태 동기화
+                let current = homeViewModel.syncCurrentStreak(
+                    remainingTimeText: trainTicketViewModel.remainingTimeText,
+                    startTimeText: trainTicketViewModel.startTimeText
+                )
+                trainTicketViewModel.sleepCount = current
+            }
+
             .background {
                 BackgroundGradientLayer()
             }
             .tabItem {
-                Label("비행", systemImage: "airplane")
+                Label("운행", systemImage: "train.side.front.car")
             }
             
-            StreakView()
+            RecordView()
                 .tabItem {
                     Label("기록", systemImage: "bed.double.fill")
                 }
@@ -101,10 +117,10 @@ private extension HomeView {
     var headerSection: some View {
         HStack(alignment: .firstTextBaseline, spacing: 10) {
             Text("운행 일정")
-                .font(.custom("AppleSDGothicNeo-Bold", size: 29))
+                .font(.system(size: 28, weight: .bold))
                 .foregroundColor(.white)
             Text(todayDateString)
-                .font(.custom("AppleSDGothicNeo-Bold", size: 19))
+                .font(.system(size: 17, weight: .semibold))
                 .foregroundColor(.white.opacity(0.6))
             Spacer(minLength: 0)
         }
