@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Foundation
+import SwiftData
 
 struct HomeView: View {
     @EnvironmentObject var authManager: AuthorizationManager
@@ -15,6 +16,8 @@ struct HomeView: View {
 
     @StateObject private var trainTicketViewModel = TrainTicketViewModel()
     @StateObject private var homeViewModel = HomeViewModel()
+    
+    @Environment(\.modelContext) private var modelContext
     
     private var todayDateString: String {
         DateFormatting.monthDayKoreanString()
@@ -38,7 +41,6 @@ struct HomeView: View {
                         streakSection
                     }
                     
-
                     CheckInBannerView(
                         remainingTimeText: trainTicketViewModel.remainingTimeText,
                         startTimeText: trainTicketViewModel.startTimeText,
@@ -47,7 +49,8 @@ struct HomeView: View {
                         performCheckIn: {
                             homeViewModel.performCheckIn(
                                 remainingTimeText: trainTicketViewModel.remainingTimeText,
-                                startTimeText: trainTicketViewModel.startTimeText
+                                startTimeText: trainTicketViewModel.startTimeText,
+                                context: modelContext
                             ) { newSleepCount in
                                 trainTicketViewModel.sleepCount = newSleepCount
                             }
@@ -57,18 +60,12 @@ struct HomeView: View {
             }
             .scrollIndicators(.hidden)
             .safeAreaPadding(.bottom, 36)
-            .onAppear {
-                let current = homeViewModel.syncCurrentStreak(
-                    remainingTimeText: trainTicketViewModel.remainingTimeText,
-                    startTimeText: trainTicketViewModel.startTimeText
-                )
-                trainTicketViewModel.sleepCount = current
-            }
             .onReceive(Timer.publish(every: 60, on: .main, in: .common).autoconnect()) { _ in
-                // 매분마다 2시간 이상 지연 상태 체크 및 sleepCount 업데이트
+                // 매분마다 2시간 이상 지연 상태 체크
                 homeViewModel.checkAndHandleFailedState(
                     remainingTimeText: trainTicketViewModel.remainingTimeText,
-                    startTimeText: trainTicketViewModel.startTimeText
+                    startTimeText: trainTicketViewModel.startTimeText,
+                    context: modelContext
                 ) { newSleepCount in
                     trainTicketViewModel.sleepCount = newSleepCount
                 }
@@ -78,23 +75,8 @@ struct HomeView: View {
                     authManager.requestAuthorization()
                 }
             }
-            .onChange(of: trainTicketViewModel.remainingTimeText) { _ in
-                // 시나리오 변경 시 오늘 체크인 초기화 및 스트릭 재계산
-                homeViewModel.resetForScenarioChange()
-                let current = homeViewModel.syncCurrentStreak(
-                    remainingTimeText: trainTicketViewModel.remainingTimeText,
-                    startTimeText: trainTicketViewModel.startTimeText
-                )
-                trainTicketViewModel.sleepCount = current
-            }
-            .onChange(of: trainTicketViewModel.startTimeText) { _ in
-                // 출발 시각 변경 시 스트릭/상태 동기화
-                let current = homeViewModel.syncCurrentStreak(
-                    remainingTimeText: trainTicketViewModel.remainingTimeText,
-                    startTimeText: trainTicketViewModel.startTimeText
-                )
-                trainTicketViewModel.sleepCount = current
-            }
+            // Mock 기반 동기화는 제거합니다. Stats가 단일 소스이며,
+            // 체크인/2시간 초과 로직에서 Stats가 갱신됩니다.
             .background {
                 BackgroundGradientLayer()
             }
