@@ -7,18 +7,19 @@
 
 import FamilyControls
 import ManagedSettings
+import SwiftData
 import SwiftUI
 
 class ScreenTimeManager: ObservableObject {
     @Published var selection = FamilyActivitySelection()
     private let store = ManagedSettingsStore()
 
-    func lockApps() {
-        store.shield.applicationCategories = .specific(selection.categoryTokens)
-        store.shield.webDomains = selection.webDomainTokens
+    func lockApps(with blockedApps: FamilyActivitySelection) {
+        store.shield.applications = blockedApps.applicationTokens
+        store.shield.applicationCategories = .specific(blockedApps.categoryTokens)
+        store.shield.webDomains = blockedApps.webDomainTokens
     }
 
-    // 체크가 풀리진않고, 잠금만해제
     func unlockApps() {
         store.clearAllSettings()
     }

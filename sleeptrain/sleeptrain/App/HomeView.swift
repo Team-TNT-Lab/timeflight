@@ -8,10 +8,6 @@
 import SwiftUI
 
 struct HomeView: View {
-    @EnvironmentObject var authManager: AuthorizationManager
-
-    @StateObject private var screenTimeManager = ScreenTimeManager()
-    @StateObject private var nfcScanManager = NFCManager()
     var body: some View {
         TabView {
 //            FlightView().tabItem {
