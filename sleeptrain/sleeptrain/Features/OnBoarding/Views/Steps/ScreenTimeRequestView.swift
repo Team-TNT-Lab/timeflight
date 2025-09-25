@@ -13,6 +13,7 @@ struct ScreenTimeRequestView: View {
         self.onNext = onNext
     }
 
+    @State private var isImageVisible: Bool = false
     @EnvironmentObject var authManager: AuthorizationManager
     var body: some View {
         ZStack {
@@ -23,6 +24,12 @@ struct ScreenTimeRequestView: View {
                 Image("ScreenTime")
                     .resizable()
                     .scaledToFit()
+                    .opacity(isImageVisible ? 1 : 0)
+                    .onAppear {
+                        withAnimation(.easeIn(duration: 1.0)) {
+                            isImageVisible = true
+                        }
+                    }
 
                 VStack(alignment: .leading, spacing: 9) {
                     Text("스크린타임 권한을 허용해주세요")
