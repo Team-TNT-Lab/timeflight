@@ -38,7 +38,7 @@ struct NfcIntro: View {
             VStack {
                 VStack(spacing: 12) {
                     Text("드림 카드에 아이폰을 태그하면\n수면 운행이 시작돼요")
-                        .font(.system(size: 23, weight: .semibold))
+                        .font(.system(size: 26, weight: .semibold))
                         .multilineTextAlignment(.center)
                         .foregroundStyle(.white)
 

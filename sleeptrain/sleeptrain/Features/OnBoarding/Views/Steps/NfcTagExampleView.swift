@@ -28,9 +28,9 @@ struct NfcTagExampleView: View {
             VStack {
                 Spacer().frame(height: 40)
                 VStack(spacing: 14) {
-                    Text("이제 카드를 등록해볼까요?").font(.system(size: 23, weight: .semibold))
+                    Text("이제 카드를 등록해볼까요?").font(.system(size: 26, weight: .semibold))
                     Text("아이폰의 상단 부분에 카드를 태그하면 돼요")
-                        .font(.system(size: 13, weight: .thin))
+                        .font(.system(size: 17, weight: .thin))
                 }
                 Spacer()
                 Image("NfcTagImage").resizable().scaledToFit().opacity(isImageVisible ? 1 : 0)

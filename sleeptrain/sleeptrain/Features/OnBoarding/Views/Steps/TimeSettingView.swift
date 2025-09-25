@@ -31,11 +31,11 @@ struct TimeSettingView: View {
             VStack {
                 VStack(spacing: 10) {
                     Text("수면 시간을 설정해주세요")
-                        .font(.system(size: 23, weight: .bold))
+                        .font(.system(size: 26, weight: .bold))
                         .foregroundStyle(.white)
 
                     Text("평균 7시간 이상의 수면을 추천해요")
-                        .font(.system(size: 16))
+                        .font(.system(size: 17))
                         .foregroundStyle(.white.opacity(0.4))
                 }
                 Spacer()
