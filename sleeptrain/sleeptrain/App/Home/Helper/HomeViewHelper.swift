@@ -8,22 +8,37 @@
 import Foundation
 import SwiftUI
 
-// MARK: - Time Parsing (moved from TimeParsing.swift)
+// MARK: - Time Parsing
 
-/// 출발 시간 문자열("HH:mm")을 오늘 날짜의 Date 객체로 변환
-/// 파싱에 실패하면 오늘 23:30을 반환
+/// 출발 시간 문자열을 오늘 날짜의 Date 객체로 변환
+/// - 지원 포맷: "HH:mm", "h:mma", "h:mm a" (AM/PM)
+/// - 파싱 실패 시 오늘 23:30을 반환
 public func parseDepartureTime(_ timeString: String) -> Date {
     let calendar = Calendar.current
     let today = Date()
-
-    let components = timeString.split(separator: ":")
-    guard components.count == 2,
-          let hour = Int(components[0]),
-          let minute = Int(components[1]) else {
-        return calendar.date(bySettingHour: 23, minute: 30, second: 0, of: today) ?? today
+    
+    // 1) 먼저 "HH:mm" 시도 (기존 동작 유지)
+    if let date = DateFormatting.dateFromTimeString(timeString) {
+        return date
     }
-
-    return calendar.date(bySettingHour: hour, minute: minute, second: 0, of: today) ?? today
+    
+    // 2) AM/PM 포맷 시도
+    let fmts = ["h:mma", "h:mm a"]
+    for f in fmts {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = f
+        if let parsed = formatter.date(from: timeString) {
+            let comps = calendar.dateComponents([.hour, .minute], from: parsed)
+            return calendar.date(bySettingHour: comps.hour ?? 23,
+                                 minute: comps.minute ?? 30,
+                                 second: 0,
+                                 of: today) ?? today
+        }
+    }
+    
+    // 3) 완전 실패 시 기본값
+    return calendar.date(bySettingHour: 23, minute: 30, second: 0, of: today) ?? today
 }
 
 /// 남은 시간 문자열("1시간 30분", "지연 15분" 등)을 분 단위(Int)로 변환
@@ -85,16 +100,6 @@ internal func formatDuration(minutes: Int) -> String {
     }
 }
 
-/// Calculate minutes until next sleep time (departure time next day) based on a start time string "HH:mm"
-//internal func minutesUntilNextSleepTime(startTimeText: String) -> Int {
-//    let now = Date()
-//    let calendar = Calendar.current
-//    let todayStart = parseDepartureTime(startTimeText)
-//    let nextDayStart = calendar.date(byAdding: .day, value: 1, to: todayStart) ?? todayStart
-//    let diff = Int(nextDayStart.timeIntervalSince(now) / 60)
-//    return max(diff, 0)
-//}
-
 internal func minutesUntilNextSleepTime(startTimeText: String) -> Int {
     let now = Date()
     let calendar = Calendar.current
@@ -112,7 +117,6 @@ internal func minutesUntilNextSleepTime(startTimeText: String) -> Int {
     let diff = Int(nextStartTime.timeIntervalSince(now) / 60)
     return max(diff, 0)
 }
-
 
 /// Banner main text logic, extracted from HomeView
 internal func makeInfoBannerText(remainingTimeText: String, startTimeText: String) -> String {
@@ -210,5 +214,4 @@ internal func calculateRemainingTimeToWakeUp(endTimeText: String) -> String {
         return "곧"
     }
 }
-
 
