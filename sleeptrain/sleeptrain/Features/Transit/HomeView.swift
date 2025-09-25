@@ -78,7 +78,7 @@ struct HomeView: View {
                     authManager.requestAuthorization()
                 }
             }
-            .onChange(of: trainTicketViewModel.remainingTimeText) { _ in
+            .onChange(of: trainTicketViewModel.remainingTimeText) { _, _ in
                 // 시나리오 변경 시 오늘 체크인 초기화 및 스트릭 재계산
                 homeViewModel.resetForScenarioChange()
                 let current = homeViewModel.syncCurrentStreak(
@@ -87,7 +87,7 @@ struct HomeView: View {
                 )
                 trainTicketViewModel.sleepCount = current
             }
-            .onChange(of: trainTicketViewModel.startTimeText) { _ in
+            .onChange(of: trainTicketViewModel.startTimeText) { _, _ in
                 // 출발 시각 변경 시 스트릭/상태 동기화
                 let current = homeViewModel.syncCurrentStreak(
                     remainingTimeText: trainTicketViewModel.remainingTimeText,
@@ -99,10 +99,10 @@ struct HomeView: View {
                 BackgroundGradientLayer()
             }
             .tabItem {
-                Label("비행", systemImage: "airplane")
+                Label("운행", systemImage: "train.side.front.car")
             }
             
-            StreakView()
+            RecordView()
                 .tabItem {
                     Label("기록", systemImage: "bed.double.fill")
                 }
