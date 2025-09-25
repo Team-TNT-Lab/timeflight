@@ -5,10 +5,7 @@
 //  Created by Dean_SSONG on 9/24/25.
 //
 
-
-
 import SwiftUI
-
 
 struct CheckInBannerView: View {
     let remainingTimeText: String
@@ -18,6 +15,7 @@ struct CheckInBannerView: View {
     let performCheckIn: () -> Void
     
     @StateObject private var nfcScanManager = NFCManager()
+    @State private var showEmergencyStopAlert = false
     
     // 현재 시간부터 기상 시간까지 남은 시간 계산
     private var timeUntilWakeUp: String {
@@ -35,7 +33,7 @@ struct CheckInBannerView: View {
                     .multilineTextAlignment(.center)
                     .lineSpacing(9.6)
                     .frame(maxWidth: .infinity)
-                    .padding(.top, 130) // 운행 중일 때만 TicketView 하단과 160 간격
+                    .padding(.top, 130)
                 
                 // subText
                 Text("잠이 오지 않으면 눈을 감고만 있어도 괜찮아요")
@@ -69,31 +67,58 @@ struct CheckInBannerView: View {
             }
 
             Button(action: {
-                nfcScanManager.startNFCScan(alertMessage: "기기를 기상 NFC 태그에 가까이 대세요") { message in
-                    if message == "\u{02}enwake" {
-                        performCheckIn()
+                if hasCheckedInToday {
+                    // 운행 중: 비상 정지 확인 얼럿
+                    showEmergencyStopAlert = true
+                } else {
+                    // 출발 전: NFC 스캔으로 체크인
+                    nfcScanManager.startNFCScan(alertMessage: "기기를 기상 NFC 태그에 가까이 대세요") { message in
+                        if message == "\u{02}enwake" {
+                            performCheckIn()
+                        }
                     }
                 }
             }) {
                 Text(hasCheckedInToday ? "비상 정지하기" : "지금 출발하기")
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(canCheckIn(
-                        remainingTimeText: remainingTimeText,
-                        hasCheckedInToday: hasCheckedInToday
-                    ) && !hasCheckedInToday ? Color.white : Color.gray.opacity(0.3))
-                    .foregroundColor(canCheckIn(
-                        remainingTimeText: remainingTimeText,
-                        hasCheckedInToday: hasCheckedInToday
-                    ) && !hasCheckedInToday ? .black : .secondary)
+                    .background(
+                        hasCheckedInToday
+                        ? Color.white
+                        : (canCheckIn(
+                            remainingTimeText: remainingTimeText,
+                            hasCheckedInToday: hasCheckedInToday
+                        ) ? Color.white : Color.gray.opacity(0.3))
+                    )
+                    .foregroundColor(
+                        hasCheckedInToday
+                        ? .black
+                        : (canCheckIn(
+                            remainingTimeText: remainingTimeText,
+                            hasCheckedInToday: hasCheckedInToday
+                        ) ? .black : .secondary)
+                    )
                     .cornerRadius(99)
             }
-            .disabled(!canCheckIn(
+            // 운행 중에는 항상 활성화, 출발 전에는 가능 조건에 따라 비활성화
+            .disabled(!hasCheckedInToday ? !canCheckIn(
                 remainingTimeText: remainingTimeText,
                 hasCheckedInToday: hasCheckedInToday
-            ) || hasCheckedInToday)
+            ) : false)
             .padding(.top, hasCheckedInToday ? 200 : 90)
             .padding(.horizontal, 16)
+            .alert("비상 정지하시겠어요?", isPresented: $showEmergencyStopAlert) {
+                Button("비상 정지하기", role: .none) {
+                    // 확인을 누르면 NFC 태그 안내를 띄워 스캔을 시작합니다.
+                    nfcScanManager.startNFCScan(alertMessage: "비상 정지를 위해 기기를 기상 NFC 태그에 가까이 대세요") { _ in
+                        // 필요 시 스캔 성공 시점에 비상 정지 처리 로직을 연결하세요.
+                        // 현재 NFCManager는 특정 페이로드("\u{02}enwake")에만 성공 콜백을 전달합니다.
+                    }
+                }
+                Button("취소", role: .cancel) {}
+            } message: {
+                Text("지금 멈추면 연속 기록이 사라져요.")
+            }
         }
     }
 }
