@@ -102,7 +102,7 @@ struct HomeView: View {
                 Label("운행", systemImage: "train.side.front.car")
             }
             
-            StreakView()
+            RecordView()
                 .tabItem {
                     Label("기록", systemImage: "bed.double.fill")
                 }
