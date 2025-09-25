@@ -119,10 +119,10 @@ private extension HomeView {
     var headerSection: some View {
         HStack(alignment: .firstTextBaseline, spacing: 10) {
             Text("운행 일정")
-                .font(.custom("AppleSDGothicNeo-Bold", size: 29))
+                .font(.system(size: 28, weight: .bold))
                 .foregroundColor(.white)
             Text(todayDateString)
-                .font(.custom("AppleSDGothicNeo-Bold", size: 19))
+                .font(.system(size: 17, weight: .semibold))
                 .foregroundColor(.white.opacity(0.6))
             Spacer(minLength: 0)
         }
