@@ -1,10 +1,3 @@
-//
-//  RecordView.swift
-//  sleeptrain
-//
-//  Created by Dean_SSONG on 9/24/25.
-//
-
 import SwiftUI
 import SwiftData
 
@@ -75,7 +68,6 @@ private extension RecordView {
     }
 }
 
-// 완료된 수면 기록 데이터 모델
 struct CompletedSleepRecord: Identifiable {
     let id = UUID()
     let startTime: String
@@ -87,7 +79,6 @@ struct CompletedSleepRecord: Identifiable {
     let streakCount: Int
 }
 
-// 완료된 티켓들
 struct CompletedTrainTicketView: View {
     let record: CompletedSleepRecord
     
