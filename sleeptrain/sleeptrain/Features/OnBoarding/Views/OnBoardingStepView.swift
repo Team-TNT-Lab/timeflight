@@ -44,6 +44,9 @@ struct OnBoardingStepView: View {
         case .timeSetting:
             TimeSettingView(next)
 
+        case .screenTimeRequest:
+            ScreenTimeRequestView(next)
+
         case .appSelection:
             AppSelectionView(next)
 
