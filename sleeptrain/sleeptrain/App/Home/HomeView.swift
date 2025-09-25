@@ -99,7 +99,7 @@ struct HomeView: View {
                 BackgroundGradientLayer()
             }
             .tabItem {
-                Label("비행", systemImage: "airplane")
+                Label("운행", systemImage: "train.side.front.car")
             }
             
             StreakView()
