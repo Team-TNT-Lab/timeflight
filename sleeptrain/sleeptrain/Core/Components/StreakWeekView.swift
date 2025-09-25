@@ -9,10 +9,6 @@ import SwiftUI
 
 struct StreakWeekView: View {
     let days: [StreakDay]
-    let currentRemainingTime: String
-    let hasCheckedInToday: Bool
-    let todayCheckInTime: Date?
-    let departureTimeString: String
 
     @State private var currentWeekOffset = 0
     
@@ -50,14 +46,8 @@ struct StreakWeekView: View {
                 ForEach(Array(visibleWeekGroups.enumerated()), id: \.offset) { weekIndex, week in
                     HStack(spacing: 0) {
                         ForEach(week) { day in
-                            DayCellView(
-                                day: day,
-                                currentRemainingTime: currentRemainingTime,
-                                hasCheckedInToday: hasCheckedInToday,
-                                todayCheckInTime: todayCheckInTime,
-                                departureTimeString: departureTimeString
-                            )
-                            .frame(maxWidth: .infinity)
+                            DayCellView(day: day)
+                                .frame(maxWidth: .infinity)
                         }
                     }
                     .tag(weekIndex)
@@ -128,3 +118,4 @@ struct StreakWeekView: View {
         return earliest > todayStart
     }
 }
+

@@ -13,29 +13,44 @@ struct CheckInBannerView: View {
     let endTimeText: String
     let hasCheckedInToday: Bool
     let performCheckIn: () -> Void
+    let performEmergencyStop: (() -> Void)?
     
     @StateObject private var nfcScanManager = NFCManager()
     @State private var showEmergencyStopAlert = false
+    @State private var didEmergencyStop: Bool = false
     
-    // 현재 시간부터 기상 시간까지 남은 시간 계산
     private var timeUntilWakeUp: String {
-        calculateRemainingTimeToWakeUp(endTimeText: endTimeText)
+        remainingTimeToArrival(fromNow: Date(), endTimeText: endTimeText)
+    }
+    
+    init(
+        remainingTimeText: String,
+        startTimeText: String,
+        endTimeText: String,
+        hasCheckedInToday: Bool,
+        performCheckIn: @escaping () -> Void,
+        performEmergencyStop: (() -> Void)? = nil
+    ) {
+        self.remainingTimeText = remainingTimeText
+        self.startTimeText = startTimeText
+        self.endTimeText = endTimeText
+        self.hasCheckedInToday = hasCheckedInToday
+        self.performCheckIn = performCheckIn
+        self.performEmergencyStop = performEmergencyStop
     }
     
     var body: some View {
         VStack(spacing: 4) {
-            // 이동 중(=오늘 체크인 완료)이면 도착 안내 문구로 전환
             if hasCheckedInToday {
-                // infoBannerText - 현재 시간부터 기상 시간까지 남은 시간 계산
+                // 운행 중: 현재시간 → 도착시간까지 남은 시간
                 Text("열차 도착까지 \(timeUntilWakeUp) 남았어요")
                     .font(.system(size: 24, weight: .bold))
                     .foregroundColor(.white)
                     .multilineTextAlignment(.center)
                     .lineSpacing(9.6)
                     .frame(maxWidth: .infinity)
-                    .padding(.top, 130)
+                    .padding(.top, 150)
                 
-                // subText
                 Text("잠이 오지 않으면 눈을 감고만 있어도 괜찮아요")
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(.white.opacity(0.5))
@@ -44,6 +59,7 @@ struct CheckInBannerView: View {
                     .frame(maxWidth: .infinity)
                     .fixedSize(horizontal: false, vertical: true)
             } else {
+                // 출발 전: 기존 방식 유지
                 Text(makeInfoBannerText(
                     remainingTimeText: remainingTimeText,
                     startTimeText: startTimeText
@@ -53,9 +69,9 @@ struct CheckInBannerView: View {
                     .multilineTextAlignment(.center)
                     .lineSpacing(9.6)
                     .frame(maxWidth: .infinity)
-                    .padding(.top, 90)
+                    .padding(.top, 80)
 
-                if let sub = makeInfoSubText(remainingTimeText: remainingTimeText) {
+                if let sub = makeInfoSubText(remainingTimeText: remainingTimeText, isEmergencyStop: didEmergencyStop) {
                     Text(sub)
                         .font(.system(size: 16, weight: .medium))
                         .foregroundColor(.white.opacity(0.5))
@@ -68,10 +84,8 @@ struct CheckInBannerView: View {
 
             Button(action: {
                 if hasCheckedInToday {
-                    // 운행 중: 비상 정지 확인 얼럿
                     showEmergencyStopAlert = true
                 } else {
-                    // 출발 전: NFC 스캔으로 체크인
                     nfcScanManager.startNFCScan(alertMessage: "기기를 기상 NFC 태그에 가까이 대세요") { message in
                         if message == "\u{02}enwake" {
                             performCheckIn()
@@ -80,6 +94,7 @@ struct CheckInBannerView: View {
                 }
             }) {
                 Text(hasCheckedInToday ? "비상 정지하기" : "지금 출발하기")
+                    .font(.system(size: 16, weight: .bold))
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(
@@ -105,14 +120,17 @@ struct CheckInBannerView: View {
                 remainingTimeText: remainingTimeText,
                 hasCheckedInToday: hasCheckedInToday
             ) : false)
-            .padding(.top, hasCheckedInToday ? 200 : 90)
+            .padding(.top, hasCheckedInToday ? 200 : 80)
             .padding(.horizontal, 16)
             .alert("비상 정지하시겠어요?", isPresented: $showEmergencyStopAlert) {
                 Button("비상 정지하기", role: .none) {
-                    // 확인을 누르면 NFC 태그 안내를 띄워 스캔을 시작합니다.
-                    nfcScanManager.startNFCScan(alertMessage: "비상 정지를 위해 기기를 기상 NFC 태그에 가까이 대세요") { _ in
-                        // 필요 시 스캔 성공 시점에 비상 정지 처리 로직을 연결하세요.
-                        // 현재 NFCManager는 특정 페이로드("\u{02}enwake")에만 성공 콜백을 전달합니다.
+                    nfcScanManager.startNFCScan(
+                        alertMessage: "비상 정지를 위해 기기를 기상 NFC 태그에 가까이 대세요"
+                    ) { message in
+                        if message == "\u{02}enwake" {
+                            didEmergencyStop = true
+                            performEmergencyStop?()
+                        }
                     }
                 }
                 Button("취소", role: .cancel) {}
@@ -122,3 +140,30 @@ struct CheckInBannerView: View {
         }
     }
 }
+
+// MARK: - 도착까지 남은 시간 계산(자정 넘김 고려)
+private func remainingTimeToArrival(fromNow now: Date, endTimeText: String) -> String {
+    let comps = endTimeText.split(separator: ":")
+    guard comps.count == 2,
+          let h = Int(comps[0]),
+          let m = Int(comps[1]) else {
+        return ""
+    }
+    let cal = Calendar.current
+    let startOfToday = cal.startOfDay(for: now)
+    var arrival = cal.date(bySettingHour: h, minute: m, second: 0, of: startOfToday) ?? now
+    if arrival <= now {
+        arrival = cal.date(byAdding: .day, value: 1, to: arrival) ?? arrival
+    }
+    let diff = cal.dateComponents([.hour, .minute], from: now, to: arrival)
+    let hours = max(0, diff.hour ?? 0)
+    let minutes = max(0, diff.minute ?? 0)
+    if hours > 0 && minutes > 0 {
+        return "\(hours)시간 \(minutes)분"
+    } else if hours > 0 {
+        return "\(hours)시간"
+    } else {
+        return "\(minutes)분"
+    }
+}
+

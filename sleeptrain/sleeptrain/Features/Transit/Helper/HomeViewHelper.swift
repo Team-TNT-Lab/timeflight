@@ -17,12 +17,10 @@ public func parseDepartureTime(_ timeString: String) -> Date {
     let calendar = Calendar.current
     let today = Date()
     
-    // 1) 먼저 "HH:mm" 시도 (기존 동작 유지)
     if let date = DateFormatting.dateFromTimeString(timeString) {
         return date
     }
     
-    // 2) AM/PM 포맷 시도
     let fmts = ["h:mma", "h:mm a"]
     for f in fmts {
         let formatter = DateFormatter()
@@ -37,7 +35,6 @@ public func parseDepartureTime(_ timeString: String) -> Date {
         }
     }
     
-    // 3) 완전 실패 시 기본값
     return calendar.date(bySettingHour: 23, minute: 30, second: 0, of: today) ?? today
 }
 
@@ -108,9 +105,8 @@ internal func minutesUntilNextSleepTime(startTimeText: String) -> Int {
 
     let nextStartTime: Date
     if todayStart > now {
-        nextStartTime = todayStart // 오늘 밤 수면 시간이 아직 남아 있다면
+        nextStartTime = todayStart
     } else {
-        // 오늘 시간은 이미 지났으므로, 다음 날로 이동
         nextStartTime = calendar.date(byAdding: .day, value: 1, to: todayStart) ?? todayStart
     }
 
@@ -118,7 +114,7 @@ internal func minutesUntilNextSleepTime(startTimeText: String) -> Int {
     return max(diff, 0)
 }
 
-/// Banner main text logic, extracted from HomeView
+
 internal func makeInfoBannerText(remainingTimeText: String, startTimeText: String) -> String {
     guard let remainingMinutes = parseRemainingTimeToMinutes(remainingTimeText) else {
         return "열차 출발 정보를 불러오는 중이에요"
@@ -135,8 +131,11 @@ internal func makeInfoBannerText(remainingTimeText: String, startTimeText: Strin
     }
 }
 
-/// Banner subtext logic, extracted from HomeView
-internal func makeInfoSubText(remainingTimeText: String) -> String? {
+
+internal func makeInfoSubText(remainingTimeText: String, isEmergencyStop: Bool = false) -> String? {
+    if isEmergencyStop {
+        return "좋은 하루 보내세요!"
+    }
     guard let remainingMinutes = parseRemainingTimeToMinutes(remainingTimeText) else {
         return nil
     }
@@ -195,7 +194,6 @@ internal func calculateRemainingTimeToWakeUp(endTimeText: String) -> String {
         return "계산 중..."
     }
     
-    // 기상 시간이 현재 시간보다 이전이면 다음 날로 설정
     if wakeUpDate <= now {
         wakeUpDate = calendar.date(byAdding: .day, value: 1, to: wakeUpDate) ?? wakeUpDate
     }

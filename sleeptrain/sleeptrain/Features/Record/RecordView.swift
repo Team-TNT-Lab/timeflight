@@ -4,7 +4,7 @@ import SwiftData
 struct RecordView: View {
     @StateObject private var homeViewModel = HomeViewModel()
     @StateObject private var trainTicketViewModel = TrainTicketViewModel()
-    
+    @Environment(\.modelContext) private var modelContext
     
     private var dateRangeString: String {
         let formatter = DateFormatter()
@@ -18,16 +18,10 @@ struct RecordView: View {
         VStack(spacing: 0) {
             headerSection
             
-            StreakWeekView(
-                days: homeViewModel.weekDays,
-                currentRemainingTime: trainTicketViewModel.remainingTimeText,
-                hasCheckedInToday: homeViewModel.hasCheckedInToday,
-                todayCheckInTime: homeViewModel.todayCheckInTime,
-                departureTimeString: trainTicketViewModel.startTimeText
-            )
-            .background(Color.clear) // 투명 배경 추가했는데 작동이 안되네요...
-            .padding(.horizontal, 16)
-            .padding(.bottom, 20)
+            StreakWeekView(days: homeViewModel.weekDays)
+                .background(Color.clear)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 20)
             
             ScrollView {
                 VStack(spacing: 16) {
@@ -43,11 +37,9 @@ struct RecordView: View {
             BackgroundGradientLayer()
         }
         .onAppear {
-            let current = homeViewModel.syncCurrentStreak(
-                remainingTimeText: trainTicketViewModel.remainingTimeText,
-                startTimeText: trainTicketViewModel.startTimeText
-            )
-            trainTicketViewModel.sleepCount = current
+            homeViewModel.refreshDisplayDays()
+            // 실데이터 streak 반영
+            trainTicketViewModel.sleepCount = homeViewModel.getCurrentStreak(context: modelContext)
         }
     }
 }
@@ -208,3 +200,4 @@ private let completedSleepRecords = [
     RecordView()
         .modelContainer(for: [UserSettings.self, Stats.self], inMemory: true)
 }
+

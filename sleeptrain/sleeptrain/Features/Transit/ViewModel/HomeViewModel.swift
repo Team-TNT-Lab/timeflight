@@ -3,20 +3,66 @@ import SwiftUI
 import SwiftData
 
 final class HomeViewModel: ObservableObject {
-    @Published var weekDays: [StreakDay] = StreakDay.extendedStreakMock()
+    @Published var weekDays: [StreakDay] = HomeViewModel.generateDisplayDays()
     @Published var hasCheckedInToday: Bool = false
     @Published var todayCheckInTime: Date?
 
-    // 시나리오(남은 시간/출발 시간) 변경 시 체크인 상태 초기화
-    func resetForScenarioChange() {
-        hasCheckedInToday = false
-        todayCheckInTime = nil
+    // 표시용 날짜 갱신(필요 시 호출)
+    func refreshDisplayDays() {
+        weekDays = Self.generateDisplayDays()
     }
-    
-    // 데모용: 카드 탭 시 오늘 체크인 초기화
-    func resetTodayCheckIn() {
-        hasCheckedInToday = false
-        todayCheckInTime = nil
+
+    // 오늘 DailyCheckIn을 조회해 UI 플래그 동기화
+    func refreshTodayCheckInState(context: ModelContext) {
+        let now = Date()
+        if let rec = fetchCheckIn(for: now, context: context), let ts = rec.checkedInAt {
+            hasCheckedInToday = true
+            todayCheckInTime = ts
+        } else {
+            hasCheckedInToday = false
+            todayCheckInTime = nil
+        }
+    }
+//      테스트용으로 사용(탭하면 체크인 초기화)
+//    // 시나리오(남은 시간/출발 시간) 변경 시 체크인 상태 초기화 (UI 상태만)
+//    func resetForScenarioChange() {
+//        hasCheckedInToday = false
+//        todayCheckInTime = nil
+//    }
+//    
+//    // 데모용: 카드 탭 시 오늘 체크인 초기화 (UI 상태만)
+//    func resetTodayCheckIn() {
+//        hasCheckedInToday = false
+//        todayCheckInTime = nil
+//    }
+
+    // MARK: - 표시용 날짜 생성(실데이터용, 모크 미사용)
+    static func generateDisplayDays(calendar: Calendar = .current) -> [StreakDay] {
+        let now = Date()
+        let startOfToday = calendar.startOfDay(for: now)
+        
+        // 과거/미래 범위
+        let pastDays = 21
+        let futureDays = 14
+        
+        // 표시 범위의 시작/끝
+        let rangeStart = calendar.date(byAdding: .day, value: -pastDays, to: startOfToday) ?? startOfToday
+        let rangeEnd = calendar.date(byAdding: .day, value: futureDays, to: startOfToday) ?? startOfToday
+        
+        // 월요일 시작 정렬
+        var cal = calendar
+        cal.firstWeekday = 2
+        let alignedStart = cal.dateInterval(of: .weekOfYear, for: rangeStart)?.start ?? rangeStart
+        
+        // alignedStart ~ rangeEnd 까지 1일 단위 생성
+        var days: [StreakDay] = []
+        var cursor = alignedStart
+        while cursor <= rangeEnd {
+            days.append(StreakDay(date: cursor, isCompleted: false))
+            cursor = calendar.date(byAdding: .day, value: 1, to: cursor) ?? cursor
+            if cursor == alignedStart { break }
+        }
+        return days
     }
 
     // MARK: - DailyCheckIn 기반 헬퍼
@@ -44,7 +90,6 @@ final class HomeViewModel: ObservableObject {
     }
     
     private func computeCurrentStreak(context: ModelContext) -> Int {
-        // 오늘부터 과거로 연속 성공(completed/lateCompleted)만 카운트
         let cal = Calendar.current
         var cursor = startOfDay(Date())
         var streak = 0
@@ -60,10 +105,14 @@ final class HomeViewModel: ObservableObject {
                     return streak
                 }
             } else {
-                // 기록 없음은 실패로 간주(연속 끊김)
                 return streak
             }
         }
+    }
+    
+    // 외부에서 호출 가능한 streak 계산 래퍼
+    func getCurrentStreak(context: ModelContext) -> Int {
+        computeCurrentStreak(context: context)
     }
     
     private func saveStreakToStats(_ streak: Int, context: ModelContext) {
@@ -83,12 +132,11 @@ final class HomeViewModel: ObservableObject {
         context: ModelContext,
         updateSleepCount: (Int) -> Void
     ) {
-        // remainingTimeText 파싱 대신 실제 시각 비교로 2시간 초과를 판정
-        let departureTime = parseDepartureTime(startTimeText) // 오늘 날짜의 출발시각
+        let departureTime = parseDepartureTime(startTimeText)
         let now = Date()
-        let diff = now.timeIntervalSince(departureTime) // 초
+        let diff = now.timeIntervalSince(departureTime)
         
-        // 이미 체크인 성공 상태면 아무 것도 하지 않음
+
         if let today = fetchCheckIn(for: now, context: context),
            today.status == DailyStatus.completed || today.status == DailyStatus.lateCompleted {
             return
@@ -102,60 +150,30 @@ final class HomeViewModel: ObservableObject {
                 rec.checkedInAt = nil
                 try? context.save()
             }
+
+            refreshTodayCheckInState(context: context)
             saveStreakToStats(0, context: context)
             updateSleepCount(0)
         }
     }
 
-    // 체크인 수행(텍스트 기반): DailyCheckIn 저장 + streak 계산/반영
+    // 체크인 수행(문자열 기반 호출의 호환 래퍼) - 실제 시각 기반으로 위임
     func performCheckIn(
         remainingTimeText: String,
         startTimeText: String,
         context: ModelContext,
         updateSleepCount: (Int) -> Void
     ) {
-        guard canCheckIn(
+        performCheckIn(
+            taggedAt: Date(),
             remainingTimeText: remainingTimeText,
-            hasCheckedInToday: hasCheckedInToday
-        ) else { return }
-        
-        hasCheckedInToday = true
-        let checkInTime = calculateCheckInTimeForCurrentScenario(
-            remainingTimeText: remainingTimeText,
-            startTimeText: startTimeText
+            startTimeText: startTimeText,
+            context: context,
+            updateSleepCount: updateSleepCount
         )
-        todayCheckInTime = checkInTime
-        
-        // 상태 판정
-        let departureTime = parseDepartureTime(startTimeText)
-        let delta = checkInTime.timeIntervalSince(departureTime)
-        let status: DailyStatus
-        if delta >= -30 * 60 && delta <= 30 * 60 {
-            status = DailyStatus.completed
-        } else if delta > 30 * 60 && delta <= 120 * 60 {
-            status = DailyStatus.lateCompleted
-        } else {
-            status = DailyStatus.failed
-        }
-        
-        // 오늘 기록 upsert
-        let rec = upsertCheckIn(for: checkInTime, context: context)
-        rec.status = status
-        rec.checkedInAt = checkInTime
-        try? context.save()
-        
-        // streak 계산/반영
-        let newStreak = computeCurrentStreak(context: context)
-        saveStreakToStats(newStreak, context: context)
-        updateSleepCount(newStreak)
-        
-        // UI용 today 상태 반영(주간 뷰 유지 중인 경우)
-        if let todayIndex = weekDays.firstIndex(where: { $0.isToday }) {
-            weekDays[todayIndex] = StreakDay(date: weekDays[todayIndex].date, isCompleted: true)
-        }
     }
     
-    // NFC 태그 시각 기반 체크인 수행
+    // NFC 태그 시각 기반 체크인 수행(실제 경로)
     func performCheckIn(
         taggedAt: Date,
         remainingTimeText: String,
@@ -163,7 +181,12 @@ final class HomeViewModel: ObservableObject {
         context: ModelContext,
         updateSleepCount: (Int) -> Void
     ) {
-        guard !hasCheckedInToday else { return }
+        if let today = fetchCheckIn(for: taggedAt, context: context),
+           today.checkedInAt != nil {
+            hasCheckedInToday = true
+            todayCheckInTime = today.checkedInAt
+            return
+        }
         
         let departureTime = parseDepartureTime(startTimeText)
         let diff = taggedAt.timeIntervalSince(departureTime) // 초 단위
@@ -172,12 +195,8 @@ final class HomeViewModel: ObservableObject {
         let lowerBound: TimeInterval = -30 * 60
         let upperBound: TimeInterval = 120 * 60
         guard diff >= lowerBound && diff <= upperBound else {
-            // 허용 시간대가 아니면 체크인하지 않음
             return
         }
-        
-        hasCheckedInToday = true
-        todayCheckInTime = taggedAt
         
         // 상태 판정
         let status: DailyStatus
@@ -195,217 +214,98 @@ final class HomeViewModel: ObservableObject {
         rec.checkedInAt = taggedAt
         try? context.save()
         
+        // UI 플래그/시간 동기화
+        refreshTodayCheckInState(context: context)
+        
         // streak 계산/반영
         let newStreak = computeCurrentStreak(context: context)
         saveStreakToStats(newStreak, context: context)
         updateSleepCount(newStreak)
         
+        // UI용 today 상태 반영(주간 뷰 유지 중인 경우)
         if let todayIndex = weekDays.firstIndex(where: { $0.isToday }) {
             weekDays[todayIndex] = StreakDay(date: weekDays[todayIndex].date, isCompleted: true)
         }
     }
 
-    // MARK: - (기존) Mock/도우미 로직: 주간 뷰 유지용
-    
-    // 오늘 상태에 따라 수면 스트릭 카운트를 계산해 반환(변경 없으면 nil)
-    // NOTE: DailyCheckIn 기반으로 전환 후에는 사용하지 않아도 됩니다.
-    func updateSleepCountBasedOnStreak(
-        remainingTimeText: String,
-        startTimeText: String
-    ) -> Int? {
-        let today = Date()
-        let calendar = Calendar.current
-        if let todayStreak = weekDays.first(where: { calendar.isDate($0.date, inSameDayAs: today) }) {
-            let checkInResult = todayStreak.getCheckInStatus(
-                currentRemainingTime: remainingTimeText,
-                hasCheckedInToday: hasCheckedInToday,
-                todayCheckInTime: todayCheckInTime,
-                departureTimeString: startTimeText,
-                parseRemainingTime: parseRemainingTimeToMinutes,
-                parseDepartureTime: { timeString, _ in parseDepartureTime(timeString) }
-            )
-            switch checkInResult {
-            case .failed:
-                return 0
-            case .completed, .lateCompleted:
-                return calculateCurrentStreak(
-                    remainingTimeText: remainingTimeText,
-                    startTimeText: startTimeText
-                )
-            default:
-                return nil
+    // MARK: - 비상 정지: 오늘을 실패 처리하고 상태/통계 동기화
+    func emergencyStopToday(
+        context: ModelContext,
+        updateSleepCount: (Int) -> Void
+    ) {
+        let now = Date()
+        // 오늘 기록 upsert 후 실패로 마킹
+        let rec = upsertCheckIn(for: now, context: context)
+        rec.status = .failed
+        rec.checkedInAt = nil
+        try? context.save()
+        
+        // UI 플래그/시간 동기화(체크인 해제 → streakSection 노출)
+        refreshTodayCheckInState(context: context)
+        
+        // streak 재계산 및 저장(실패 → 0)
+        let newStreak = computeCurrentStreak(context: context)
+        saveStreakToStats(newStreak, context: context)
+        updateSleepCount(newStreak)
+        
+        // 표시용 weekDays의 오늘 셀은 미완료로 업데이트(실제 아이콘은 SwiftData 기반으로 failed 표시)
+        if let todayIndex = weekDays.firstIndex(where: { $0.isToday }) {
+            weekDays[todayIndex] = StreakDay(date: weekDays[todayIndex].date, isCompleted: false)
+        }
+    }
+
+    // MARK: - 백필: 첫 기록 이후의 누락일을 failed로 채워 넣기
+    // - 첫 설치(기록 0개)인 경우 아무 것도 하지 않음 → 비어있는 상태 유지
+    // - 첫 기록이 생긴 이후부터 오늘 이전까지, 존재하지 않는 날짜는 failed로 저장
+    func backfillMissedDays(context: ModelContext) {
+        let cal = Calendar.current
+        let todayStart = cal.startOfDay(for: Date())
+        
+        // 날짜 오름차순으로 모든 기록 조회
+        let desc = FetchDescriptor<DailyCheckIn>(sortBy: [SortDescriptor(\.date, order: .forward)])
+        guard let records = try? context.fetch(desc), !records.isEmpty else {
+            return
+        }
+        
+        // 존재하는 날짜 집합
+        let existing = Set(records.map { cal.startOfDay(for: $0.date) })
+        // 백필 시작일: 첫 기록의 날짜
+        guard let firstDate = records.first.map({ cal.startOfDay(for: $0.date) }) else { return }
+        
+        var cursor = firstDate
+        var inserted = 0
+        
+        while cursor < todayStart {
+            if !existing.contains(cursor) {
+                let missing = DailyCheckIn(date: cursor, status: .failed, checkedInAt: nil)
+                context.insert(missing)
+                inserted += 1
             }
+            guard let next = cal.date(byAdding: .day, value: 1, to: cursor) else { break }
+            cursor = cal.startOfDay(for: next)
         }
-        return nil
+        
+        if inserted > 0 {
+            try? context.save()
+        }
     }
 
-    /// (Mock) 연속 체크인 성공 일수 계산
-    /// NOTE: 실제 streak은 DailyCheckIn 기반 computeCurrentStreak를 사용하세요.
-    func calculateCurrentStreak(
-        remainingTimeText: String,
-        startTimeText: String
-    ) -> Int {
-        let today = Date()
-        let calendar = Calendar.current
-        var streak = 0
-        let sortedDays = weekDays.sorted { $0.date > $1.date }
-        
-        for day in sortedDays {
-            if calendar.startOfDay(for: day.date) > calendar.startOfDay(for: today) {
-                continue
-            }
-            let status = day.getCheckInStatus(
-                currentRemainingTime: remainingTimeText,
-                hasCheckedInToday: hasCheckedInToday,
-                todayCheckInTime: todayCheckInTime,
-                departureTimeString: startTimeText,
-                parseRemainingTime: parseRemainingTimeToMinutes,
-                parseDepartureTime: { timeString, _ in parseDepartureTime(timeString) }
-            )
-            switch status {
-            case .completed, .lateCompleted:
-                streak += 1
-            case .failed:
-                break
-            case .notReached, .available:
-                if calendar.isDateInToday(day.date) {
-                    continue
-                } else {
-                    break
-                }
-            default:
-                continue
-            }
-        }
-        return streak
-    }
-
-    /// 남은 시간과 출발 시간을 기반으로 현재 시나리오의 체크인 시간 계산(데모용)
-    func calculateCheckInTimeForCurrentScenario(
-        remainingTimeText: String,
-        startTimeText: String
-    ) -> Date {
-        let calendar = Calendar.current
-        let today = Date()
-        let departureTime = parseDepartureTime(startTimeText)
-        
-        guard let remainingMinutes = parseRemainingTimeToMinutes(remainingTimeText) else {
-            return today
-        }
-        // 양수: 출발까지 남은 시간 -> 출발 시각으로부터 -remainingMinutes
-        // 음수: 지연(이미 출발 시각 경과) -> 출발 시각으로부터 +abs(remainingMinutes)
-        let offset = remainingMinutes >= 0 ? -remainingMinutes : abs(remainingMinutes)
-        return calendar.date(byAdding: .minute, value: offset, to: departureTime) ?? today
-    }
-    
-    // 단순 시간 계산 유틸들(기존 유지)
-    func calculateRemainingTime(from startDate: Date, to endTimeText: String) -> String? {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        
-        guard let endTime = formatter.date(from: endTimeText) else { return nil }
-
-        var calendar = Calendar.current
-        let startComponents = calendar.dateComponents([.year, .month, .day], from: startDate)
-        let endComponents = calendar.dateComponents([.hour, .minute], from: endTime)
-
-        var combinedComponents = DateComponents()
-        combinedComponents.year = startComponents.year
-        combinedComponents.month = startComponents.month
-        combinedComponents.day = startComponents.day
-        combinedComponents.hour = endComponents.hour
-        combinedComponents.minute = endComponents.minute
-
-        guard var endDate = calendar.date(from: combinedComponents) else { return nil }
-
-        if endDate < startDate {
-            endDate = calendar.date(byAdding: .day, value: 1, to: endDate)!
-        }
-
-        let diff = calendar.dateComponents([.hour, .minute], from: startDate, to: endDate)
-        let hours = diff.hour ?? 0
-        let minutes = diff.minute ?? 0
-
-        if hours > 0 && minutes > 0 {
-            return "\(hours)시간 \(minutes)분"
-        } else if hours > 0 {
-            return "\(hours)시간"
-        } else if minutes > 0 {
-            return "\(minutes)분"
-        } else {
-            return "0분"
-        }
-    }
-    
-    func calculateRemainingTimeFromCheckInToEnd(
-        startTimeText: String,
-        remainingTimeText: String,
-        endTimeText: String
-    ) -> String? {
-        let checkInTime = calculateCheckInTimeForCurrentScenario(
-            remainingTimeText: remainingTimeText,
-            startTimeText: startTimeText
-        )
-        return calculateRemainingTime(from: checkInTime, to: endTimeText)
-    }
-    
-    // (Deprecated in UI) Mock 동기화 메서드 - DailyCheckIn 기반으로 대체됨
-    func syncCurrentStreak(
-        remainingTimeText: String,
-        startTimeText: String
-    ) -> Int {
-        guard let remainingMinutes = parseRemainingTimeToMinutes(remainingTimeText) else {
-            return calculateCurrentStreak(remainingTimeText: remainingTimeText, startTimeText: startTimeText)
-        }
-        if remainingMinutes <= -120 {
-            return 0
-        }
-        return calculateCurrentStreak(
-            remainingTimeText: remainingTimeText,
-            startTimeText: startTimeText
-        )
-    }
-    
-    func calculateRemainingTimeToDeparture(from currentTime: Date, targetDepartureTime: String) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        
-        guard let departureTimeToday = formatter.date(from: targetDepartureTime) else {
-            return ""
-        }
-        
-        let calendar = Calendar.current
-        let currentComponents = calendar.dateComponents([.year, .month, .day], from: currentTime)
-        let departureComponents = calendar.dateComponents([.hour, .minute], from: departureTimeToday)
-        
-        var combinedComponents = DateComponents()
-        combinedComponents.year = currentComponents.year
-        combinedComponents.month = currentComponents.month
-        combinedComponents.day = currentComponents.day
-        combinedComponents.hour = departureComponents.hour
-        combinedComponents.minute = departureComponents.minute
-        
-        guard var departureDate = calendar.date(from: combinedComponents) else {
-            return ""
-        }
-        
-        let maxDelay = departureDate.addingTimeInterval(2 * 3600)
-        if currentTime > maxDelay {
-            departureDate = calendar.date(byAdding: .day, value: 1, to: departureDate)!
-        }
-        
-        let diff = calendar.dateComponents([.hour, .minute], from: currentTime, to: departureDate)
-        let hours = diff.hour ?? 0
-        let minutes = diff.minute ?? 0
-        
-        if hours > 0 && minutes > 0 {
-            return "\(hours)시간 \(minutes)분"
-        } else if hours > 0 {
-            return "\(hours)시간"
-        } else if minutes > 0 {
-            return "\(minutes)분"
-        } else {
-            return "0분"
-        }
-    }
+//    // MARK: - (기존) Mock/도우미 로직: 주간 뷰 유지용
+//    // 아래 함수들은 더 이상 호출하지 않도록 HomeView/RecordView를 수정했습니다.
+//    // 필요 시 나중에 제거하세요.
+//    
+//    func updateSleepCountBasedOnStreak(
+//        remainingTimeText: String,
+//        startTimeText: String
+//    ) -> Int? { nil }
+//
+//    func calculateCurrentStreak(
+//        remainingTimeText: String,
+//        startTimeText: String
+//    ) -> Int { 0 }
+//
+//    func syncCurrentStreak(
+//        remainingTimeText: String,
+//        startTimeText: String
+//    ) -> Int { 0 }
 }
