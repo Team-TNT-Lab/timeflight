@@ -16,6 +16,8 @@ struct NfcIntro: View {
     @State private var isImageVisible = false
     var body: some View {
         ZStack {
+            Color.clear
+                .background(.onBoardingBackground2)
             VStack {
                 Image("NfcIntro")
                     .resizable()
@@ -50,7 +52,6 @@ struct NfcIntro: View {
                 Spacer()
 
                 PrimaryButton(buttonText: "다음", action: { onNext() })
-                    .padding(.bottom, 20)
             }
         }
     }

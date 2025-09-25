@@ -14,30 +14,39 @@ struct WelcomeView: View {
     }
 
     var body: some View {
-        VStack {
-            Spacer()
-            VStack(spacing: 25) {
-                Text("SLEEP TRAIN")
-                    .font(.custom("neurimboGothicRegular", size: 50))
+        ZStack {
+            Image("MainBackground")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
+            VStack {
+                Spacer()
+                VStack(spacing: 25) {
+                    Text("SLEEP TRAIN")
+                        .font(.custom("neurimboGothicRegular", size: 50))
 
-                Text("꿈을 향해 달려가는 기차여행")
-                    .font(.custom("116watermelon", size: 25))
-            }
-            Spacer()
-            Spacer()
-            VStack(spacing: 13) {
-                PrimaryButton(buttonText: "시작하기", action: { onNext() })
+                    Text("꿈을 향해 달려가는 기차여행")
+                        .font(.custom("116watermelon", size: 25))
+                }
+                Spacer()
+                Spacer()
+                VStack(spacing: 13) {
+                    PrimaryButton(buttonText: "시작하기", action: { onNext() })
 
-                Text("Made by").font(.system(size: 13)).foregroundStyle(Color.gray)
-            }
-        }.safeAreaInset(edge: .bottom) {
-            HStack(spacing: 8) {
-                Image("tnt")
-                    .resizable()
-                    .frame(width: 25, height: 25)
-                Text("tntlab")
-                    .font(.custom("Afacad-Bold", size: 31))
-            }
+                    Text("Made by").font(.system(size: 13)).foregroundStyle(Color.gray)
+                    HStack(spacing: 8) {
+                        Image("tnt")
+                            .resizable()
+                            .frame(width: 25, height: 25)
+                        Text("tntlab")
+                            .font(.custom("Afacad-Bold", size: 31))
+                    }
+                }
+            }.padding(.bottom, 30)
         }
     }
+}
+
+#Preview {
+    WelcomeView { print("H") }
 }

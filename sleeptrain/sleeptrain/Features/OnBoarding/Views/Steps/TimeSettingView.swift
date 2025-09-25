@@ -26,6 +26,8 @@ struct TimeSettingView: View {
 
     var body: some View {
         ZStack {
+            Color.clear
+                .background(.primaryBackground)
             VStack {
                 VStack(spacing: 10) {
                     Text("수면 시간을 설정해주세요")
