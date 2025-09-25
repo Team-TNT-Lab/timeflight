@@ -44,6 +44,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		7D8D8BB12E821A40002CE07C /* Exceptions for "sleeptrain" folder in "sleeptrain" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 7DCC16392E7C30E700499E59 /* sleeptrain */;
+		};
 		ED5A13792E83828D00599719 /* Exceptions for "SleepTrainWidget" folder in "sleeptrain" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -72,6 +79,7 @@
 		7DCC163C2E7C30E700499E59 /* sleeptrain */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				7D8D8BB12E821A40002CE07C /* Exceptions for "sleeptrain" folder in "sleeptrain" target */,
 				ED9FD0662E823E9000904D05 /* Exceptions for "sleeptrain" folder in "SleepTrainWidgetExtension" target */,
 			);
 			path = sleeptrain;
@@ -403,6 +411,7 @@
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = RP5GZ99V95;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = sleeptrain/Info.plist;
 				INFOPLIST_KEY_NFCReaderUsageDescription = "NFC 스캔";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -444,6 +453,7 @@
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = RP5GZ99V95;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = sleeptrain/Info.plist;
 				INFOPLIST_KEY_NFCReaderUsageDescription = "NFC 스캔";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

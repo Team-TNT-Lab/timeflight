@@ -16,13 +16,13 @@ struct TrainTicketView: View {
             HStack {
                 Text(viewModel.startTimeText)
                     .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                 
                 Spacer()
                 
                 Text(viewModel.endTimeText)
                     .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
             }
             .padding(.horizontal, 20)
             .padding(.top, 20)
@@ -34,7 +34,7 @@ struct TrainTicketView: View {
                 // 시작 요일
                 Text(viewModel.startDayText)
                     .font(.system(size: 30, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                 
                 Spacer().frame(width: 10)
                 
@@ -43,7 +43,7 @@ struct TrainTicketView: View {
                     // 기차 아이콘
                     Image(systemName: "train.side.front.car")
                         .font(.system(size: 20))
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                     
                     // 진행 바
                     Rectangle()
@@ -58,7 +58,7 @@ struct TrainTicketView: View {
                 // 종료 요일
                 Text(viewModel.endDayText)
                     .font(.system(size: 30, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
             }
             .padding(.horizontal, 20)
             
@@ -69,11 +69,11 @@ struct TrainTicketView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(viewModel.remainingTimeText)
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.blue)
+                        .foregroundStyle(.blue)
                     
                     Text("열차 출발까지")
                         .font(.system(size: 14))
-                        .foregroundColor(.blue)
+                        .foregroundStyle(.blue)
                 }
                 
                 Spacer()
@@ -82,11 +82,11 @@ struct TrainTicketView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "bed.double.badge.checkmark.fill")
                             .font(.system(size: 16))
-                            .foregroundColor(.black)
+                            .foregroundStyle(.black)
                         
                         Text("\(viewModel.sleepCount)")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.black)
+                            .foregroundStyle(.black)
                     }
                     .padding(.horizontal, 8)
                     .padding(.vertical, 8)

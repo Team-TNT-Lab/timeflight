@@ -31,12 +31,19 @@ struct TimePickerSheet: View {
             DatePicker("", selection: $date, displayedComponents: .hourAndMinute)
                 .datePickerStyle(.wheel)
                 .labelsHidden()
-                .padding(.top, 8)
-            Button("완료") { isPresented = false }
-                .font(.system(size: 18, weight: .semibold))
-                .padding()
+                .padding(.top, 10)
+
+            Button(action: { isPresented = false }) {
+                Text("완료")
+                    .font(.system(size: 18, weight: .semibold))
+                    .frame(maxWidth: .infinity, minHeight: 50)
+                    .contentShape(Capsule())
+            }
+            .background(Color.white)
+            .clipShape(Capsule())
         }
-        .presentationDetents([.height(200)])
+        .padding(.horizontal, 20)
+        .presentationDetents([.height(300)])
         .presentationDragIndicator(.visible)
     }
 }
