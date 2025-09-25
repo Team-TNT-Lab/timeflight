@@ -28,9 +28,10 @@ struct NfcTagExampleView: View {
             VStack {
                 Spacer().frame(height: 40)
                 VStack(spacing: 14) {
-                    Text("이제 카드를 등록해볼까요?").font(.system(size: 26, weight: .semibold))
+                    Text("이제 카드를 등록해볼까요?")
+                        .font(.mainTitle)
                     Text("아이폰의 상단 부분에 카드를 태그하면 돼요")
-                        .font(.system(size: 17, weight: .thin))
+                        .font(.subTitle)
                 }
                 Spacer()
                 Image("NfcTagImage").resizable().scaledToFit().opacity(isImageVisible ? 1 : 0)
@@ -50,7 +51,7 @@ struct NfcTagExampleView: View {
                         noCardAlert.toggle()
                     } label: {
                         Text("아직 카드가 없어요")
-                            .font(.system(size: 15, weight: .medium))
+                            .font(.subTitle)
                             .foregroundStyle(Color.white)
                             .opacity(0.5)
                     }
@@ -58,9 +59,9 @@ struct NfcTagExampleView: View {
             }.alert(isPresented: $noCardAlert) {
                 Alert(
                     title: Text("드림카드 없이 진행")
-                        .font(.system(size: 17, weight: .semibold)),
+                        .font(.subTitleEmphasized),
                     message: Text("카드가 없어도 앱 사용이 가능해요.\n나중에 설정에서 등록할 수 있어요.")
-                        .font(.system(size: 17, weight: .regular)),
+                        .font(.subTitle),
                     primaryButton: .default(
                         Text("진행하기"),
                         action: {

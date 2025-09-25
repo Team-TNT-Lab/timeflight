@@ -26,9 +26,9 @@ struct ScreenTimeRequestView: View {
 
                 VStack(alignment: .leading, spacing: 9) {
                     Text("스크린타임 권한을 허용해주세요")
-                        .font(.system(size: 27, weight: .semibold))
+                        .font(.mainTitle)
                     Text("앱의 모든 기능을 사용하기 위해\n스크린타임 권한 허용을 선택해주세요")
-                        .font(.system(size: 13, weight: .thin))
+                        .font(.caption)
                 }
                 .padding(.leading, 30)
                 .frame(maxWidth: .infinity, alignment: .leading)

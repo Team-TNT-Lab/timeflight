@@ -25,9 +25,9 @@ struct OnboardingCompleteView: View {
                 Spacer()
                 VStack(spacing: 4) {
                     Text("열차가 준비되었어요")
-                        .font(.system(size: 26, weight: .bold))
+                        .font(.mainTitleEmphasized)
                     Text("이제 편안한 수면 여행을 시작해볼까요?")
-                        .font(.system(size: 17, weight: .medium))
+                        .font(.subTitle)
                         .opacity(0.5)
                 }
                 .opacity(isImageVisible ? 1 : 0)

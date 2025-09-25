@@ -31,11 +31,11 @@ struct TimeSettingView: View {
             VStack {
                 VStack(spacing: 10) {
                     Text("수면 시간을 설정해주세요")
-                        .font(.system(size: 26, weight: .bold))
+                        .font(.mainTitleEmphasized)
                         .foregroundStyle(.white)
 
                     Text("평균 7시간 이상의 수면을 추천해요")
-                        .font(.system(size: 17))
+                        .font(.subTitle)
                         .foregroundStyle(.white.opacity(0.4))
                 }
                 Spacer()
@@ -44,7 +44,7 @@ struct TimeSettingView: View {
                     Spacer()
                     VStack(spacing: 15) {
                         Text("잠드는 시간")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.subTitle)
                             .foregroundStyle(.white.opacity(0.8))
 
                         Button {
@@ -56,7 +56,7 @@ struct TimeSettingView: View {
 
                     VStack(spacing: 15) {
                         Text("일어나는 시간")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.subTitle)
                             .foregroundStyle(.white.opacity(0.8))
 
                         Button {
@@ -67,7 +67,7 @@ struct TimeSettingView: View {
                     }
                     Spacer()
                     Text(sleepDurationText)
-                        .font(.system(size: 16, weight: .medium))
+                        .font(.subTitle)
                         .foregroundStyle(.white.opacity(0.6))
                 }
             }

@@ -26,7 +26,7 @@ struct NameInputView: View {
             VStack {
                 Spacer().frame(height: 40)
                 Text("기관사 이름을 등록하세요")
-                    .font(.system(size: 26, weight: .bold))
+                    .font(.mainTitle)
                 Spacer()
                 TextField("굿나잇", text: $name)
                     .font(.system(size: 25, weight: .medium))
