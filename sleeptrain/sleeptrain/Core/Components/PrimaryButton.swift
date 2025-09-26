@@ -21,6 +21,7 @@ struct PrimaryButton: View {
                 .clipShape(Capsule())
         }
         .padding(.horizontal, 20)
+        .padding(.bottom, 20)
         .contentShape(Capsule())
         .accessibilityLabel(Text(buttonText))
     }
