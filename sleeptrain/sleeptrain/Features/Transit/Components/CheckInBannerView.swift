@@ -14,6 +14,7 @@ struct CheckInBannerView: View {
     let endTimeText: String
     let hasCheckedInToday: Bool
     let performCheckIn: () -> Void
+    let performCheckOut: () -> Void
     let isGuestUser: Bool
     
     @StateObject private var nfcScanManager = NFCManager()
@@ -114,10 +115,12 @@ struct CheckInBannerView: View {
             .padding(.horizontal, 16)
             .alert("운행을 종료하시겠어요?", isPresented: $showEmergencyStopAlert) {
                 Button("운행 종료하기", role: .none) {
-                    // 확인을 누르면 NFC 태그 안내를 띄워 스캔을 시작합니다.
-                    nfcScanManager.startNFCScan(alertMessage: "기기를 드림카드에 태그해주세요") { _ in
-                        // 필요 시 스캔 성공 시점에 비상 정지 처리 로직을 연결하세요.
-                        // 현재 NFCManager는 특정 페이로드("\u{02}enwake")에만 성공 콜백을 전달합니다.
+                    if isGuestUser {
+                        authenticateWithFaceIDForCheckOut()  // 게스트: Face ID
+                    } else {
+                        nfcScanManager.startNFCScan(alertMessage: "기기를 드림카드에 태그해주세요") { _ in
+                            performCheckOut()  // NFC 성공 시 체크아웃
+                        }
                     }
                 }
                 Button("취소", role: .cancel) {}
@@ -151,6 +154,27 @@ struct CheckInBannerView: View {
             }
         } else {
             performCheckIn()
+        }
+    }
+
+    private func authenticateWithFaceIDForCheckOut() {
+        let context = LAContext()
+        var error: NSError?
+        
+        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+            let reason = "운행 종료를 위해 Face ID 인증이 필요합니다."
+            
+            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, authenticationError in
+                DispatchQueue.main.async {
+                    if success {
+                        performCheckOut()
+                    } else {
+                        print("Face ID 인증 실패")
+                    }
+                }
+            }
+        } else {
+            performCheckOut()
         }
     }
 }
