@@ -1,15 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "tnt_logo.png",
+      "filename" : "tnt.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "tnt 1.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "tnt 2.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

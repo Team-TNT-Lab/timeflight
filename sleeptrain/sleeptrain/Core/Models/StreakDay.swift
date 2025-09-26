@@ -1,11 +1,6 @@
-//
-//  StreakDay.swift
-//  sleeptrain
-//
-//  Created by Dean_SSONG on 9/23/25.
-//
-
 import Foundation
+
+// MARK: - 모델 정의
 
 /// 주간 스트릭(요일별 달성 상태)을 표현하는 가벼운 값 타입
 struct StreakDay: Identifiable, Hashable {
@@ -19,7 +14,8 @@ struct StreakDay: Identifiable, Hashable {
     }
 }
 
-// MARK: - Mock / Factory
+// MARK: - 목데이터 생성
+
 extension StreakDay {
     static func currentWeekMock(calendar: Calendar = .current) -> [StreakDay] {
         let now = Date()
@@ -93,6 +89,7 @@ extension StreakDay {
 }
 
 // MARK: - 체크인 상태 타입
+
 enum CheckInStatus {
     case notReached
     case available
@@ -103,7 +100,8 @@ enum CheckInStatus {
     case noRecord
 }
 
-// MARK: - 실제 데이터 기반 상태 계산
+// MARK: - 상태 판별 로직 (실제 데이터 기반)
+
 extension StreakDay {
     static func departureDate(for day: Date, fromTemplate template: Date, calendar: Calendar = .current) -> Date {
         let h = calendar.component(.hour, from: template)
@@ -206,7 +204,8 @@ extension StreakDay {
     }
 }
 
-// MARK: - 기존(문자열 기반) 호출과의 호환 오버로드
+// MARK: - 상태 판별 로직 (문자열 기반 호환)
+
 extension StreakDay {
     func getCheckInStatus(
         currentTime: Date = Date(),
@@ -256,7 +255,8 @@ extension StreakDay {
     }
 }
 
-// MARK: - 실제 데이터 사용을 위한 헬퍼 함수 예시
+// MARK: - 유틸 함수
+
 extension StreakDay {
     static func calculateRemainingTimeToDeparture(from currentTime: Date, departureTimeString: String) -> String {
         let formatter = DateFormatter()

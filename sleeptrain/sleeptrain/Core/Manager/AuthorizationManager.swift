@@ -14,7 +14,6 @@ class AuthorizationManager: ObservableObject {
     let authorizationCenter = AuthorizationCenter.shared
     
     @Published var isAuthorized = false
-    @Published var isLoading = true
     
     init() {
         checkAuthorizationStatus()
@@ -24,7 +23,6 @@ class AuthorizationManager: ObservableObject {
         Task {
             let status = authorizationCenter.authorizationStatus
             self.isAuthorized = status == .approved
-            self.isLoading = false
         }
     }
     

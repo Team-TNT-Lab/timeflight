@@ -20,30 +20,33 @@ struct NameInputView: View {
     }
 
     var body: some View {
-        VStack {
-            Spacer().frame(height: 40)
-            Text("기관사 이름을 등록하세요")
-                .font(.system(size: 23, weight: .bold))
-            Spacer()
-            TextField("굿나잇", text: $name)
-                .font(.system(size: 25, weight: .medium))
-                .multilineTextAlignment(.center)
-                .padding(.vertical, 12)
-                .overlay(
-                    Rectangle()
-                        .frame(height: 1)
-                        .foregroundStyle(.white.opacity(0.85)),
-                    alignment: .bottom
-                )
-                .frame(maxWidth: 200)
+        ZStack {
+            Color.clear
+                .background(.primaryBackground)
+            VStack {
+                Spacer().frame(height: 40)
+                Text("기관사 이름을 등록하세요")
+                    .font(.mainTitle)
+                Spacer()
+                TextField("굿나잇", text: $name)
+                    .font(.system(size: 25, weight: .medium))
+                    .multilineTextAlignment(.center)
+                    .padding(.vertical, 12)
+                    .overlay(
+                        Rectangle()
+                            .frame(height: 1)
+                            .foregroundStyle(.white.opacity(0.85)),
+                        alignment: .bottom
+                    )
+                    .frame(maxWidth: 200)
 
-            Spacer()
+                Spacer()
 
-            PrimaryButton(buttonText: "다음", action: saveName)
-                .opacity(name.count == 0 ? 0.5 : 1)
-                .disabled(name.count == 0)
+                PrimaryButton(buttonText: "다음", action: saveName)
+                    .opacity(name.count == 0 ? 0.5 : 1)
+                    .disabled(name.count == 0)
+            }
         }
-        .padding(.bottom, 20)
     }
 
     private func saveName() {

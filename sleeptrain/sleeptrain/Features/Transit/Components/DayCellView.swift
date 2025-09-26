@@ -1,10 +1,3 @@
-//
-//  DayCellView.swift
-//  sleeptrain
-//
-//  Created by Dean_SSONG on 9/24/25.
-//
-
 import SwiftUI
 import SwiftData
 
@@ -20,27 +13,13 @@ struct DayCellView: View {
     
     var body: some View {
         VStack(spacing: 4) {
-            if day.date != Date.distantPast {
-                Text("\(Calendar.current.component(.day, from: day.date))")
-                    .font(.system(size: 14))
-                    .fontWeight(day.isToday ? .semibold : .regular)
-                    .foregroundColor(.white)
-            } else {
-                Text(" ")
-                    .font(.system(size: 14))
-            }
-            
-            if day.date != Date.distantPast {
-                iconView(for: status)
-            } else {
-                Spacer()
-                    .frame(width: 35, height: 35)
-            }
+            dayNumberView
+            statusIconView
         }
     }
     
     // MARK: - 상태 계산(실데이터)
-    private var status: CheckInStatus {
+    private var checkInStatus: CheckInStatus {
         let daily = fetchCheckIn(for: day.date)
         if let settings = userSettings.first {
             return day.getCheckInStatus(daily: daily, userSettings: settings)
@@ -106,6 +85,29 @@ struct DayCellView: View {
         case .noRecord:
             Circle()
                 .fill(Color.secondary.opacity(0.4))
+                .frame(width: 35, height: 35)
+        }
+    }
+    
+    // MARK: - View Components
+    private var dayNumberView: some View {
+        if day.date != Date.distantPast {
+            return Text("\(Calendar.current.component(.day, from: day.date))")
+                .font(.system(size: 14))
+                .fontWeight(day.isToday ? .semibold : .regular)
+                .foregroundColor(.white)
+        } else {
+            return Text(" ")
+                .font(.system(size: 14))
+        }
+    }
+
+    @ViewBuilder
+    private var statusIconView: some View {
+        if day.date != Date.distantPast {
+            iconView(for: checkInStatus)
+        } else {
+            Spacer()
                 .frame(width: 35, height: 35)
         }
     }

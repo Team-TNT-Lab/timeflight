@@ -10,6 +10,8 @@ import SwiftUI
 
 struct TimeSettingView: View {
     let onNext: () -> Void
+    let buttonText: String
+    let hideTabBar: Bool
 
     @Environment(\.modelContext) private var modelContext
     @Query private var userSettings: [UserSettings]
@@ -20,20 +22,24 @@ struct TimeSettingView: View {
     @State private var isShowingBedTimePicker: Bool = false
     @State private var isShowingWakeTimePicker: Bool = false
 
-    init(_ onNext: @escaping () -> Void) {
+    init(_ onNext: @escaping () -> Void, buttonText: String = "다음", hideTabBar: Bool = false) {
         self.onNext = onNext
+        self.buttonText = buttonText
+        self.hideTabBar = hideTabBar
     }
 
     var body: some View {
         ZStack {
+            Color.clear
+                .background(.primaryBackground)
             VStack {
                 VStack(spacing: 10) {
                     Text("수면 시간을 설정해주세요")
-                        .font(.system(size: 23, weight: .bold))
+                        .font(.mainTitleEmphasized)
                         .foregroundStyle(.white)
 
                     Text("평균 7시간 이상의 수면을 추천해요")
-                        .font(.system(size: 16))
+                        .font(.subTitle)
                         .foregroundStyle(.white.opacity(0.4))
                 }
                 Spacer()
@@ -42,7 +48,7 @@ struct TimeSettingView: View {
                     Spacer()
                     VStack(spacing: 15) {
                         Text("잠드는 시간")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.subTitle)
                             .foregroundStyle(.white.opacity(0.8))
 
                         Button {
@@ -54,7 +60,7 @@ struct TimeSettingView: View {
 
                     VStack(spacing: 15) {
                         Text("일어나는 시간")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.subTitle)
                             .foregroundStyle(.white.opacity(0.8))
 
                         Button {
@@ -65,14 +71,19 @@ struct TimeSettingView: View {
                     }
                     Spacer()
                     Text(sleepDurationText)
-                        .font(.system(size: 16, weight: .medium))
+                        .font(.subTitle)
                         .foregroundStyle(.white.opacity(0.6))
                 }
             }
             .padding(.all, 20)
-        }.safeAreaInset(edge: .bottom, content: {
-            PrimaryButton(buttonText: "다음") {
-                saveTimeSettings()
+        }
+        .toolbar(hideTabBar ? .hidden : .visible, for: .tabBar)
+        .safeAreaInset(edge: .bottom, content: {
+            VStack(spacing: 0) {
+                Spacer().frame(height: 20)
+                PrimaryButton(buttonText: LocalizedStringKey(buttonText)) {
+                    saveTimeSettings()
+                }
             }
         })
         .onAppear {

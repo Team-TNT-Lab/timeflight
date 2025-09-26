@@ -1,5 +1,3 @@
-// DateFormatting.swift
-
 import Foundation
 
 public enum DateFormatting {

@@ -7,15 +7,15 @@ final class HomeViewModel: ObservableObject {
     @Published var hasCheckedInToday: Bool = false
     @Published var todayCheckInTime: Date?
 
+    // MARK: - UI 상태 동기화
+
     // 표시용 날짜 갱신(필요 시 호출)
     func refreshDisplayDays() {
         weekDays = Self.generateDisplayDays()
     }
 
-    // 오늘 DailyCheckIn을 조회해 UI 플래그 동기화
-    func refreshTodayCheckInState(context: ModelContext) {
-        let now = Date()
-        if let rec = fetchCheckIn(for: now, context: context), let ts = rec.checkedInAt {
+    private func updateCheckInState(_ checkIn: DailyCheckIn?) {
+        if let ts = checkIn?.checkedInAt {
             hasCheckedInToday = true
             todayCheckInTime = ts
         } else {
@@ -23,18 +23,15 @@ final class HomeViewModel: ObservableObject {
             todayCheckInTime = nil
         }
     }
-//      테스트용으로 사용(탭하면 체크인 초기화)
-//    // 시나리오(남은 시간/출발 시간) 변경 시 체크인 상태 초기화 (UI 상태만)
-//    func resetForScenarioChange() {
-//        hasCheckedInToday = false
-//        todayCheckInTime = nil
-//    }
-//    
-//    // 데모용: 카드 탭 시 오늘 체크인 초기화 (UI 상태만)
-//    func resetTodayCheckIn() {
-//        hasCheckedInToday = false
-//        todayCheckInTime = nil
-//    }
+
+    // 오늘 DailyCheckIn을 조회해 UI 플래그 동기화
+    func refreshTodayCheckInState(context: ModelContext) {
+        let now = Date()
+        let record = fetchCheckIn(for: now, context: context)
+        updateCheckInState(record)
+    }
+
+    // MARK: - 표시용 날짜 생성
 
     // MARK: - 표시용 날짜 생성(실데이터용, 모크 미사용)
     static func generateDisplayDays(calendar: Calendar = .current) -> [StreakDay] {
@@ -65,7 +62,7 @@ final class HomeViewModel: ObservableObject {
         return days
     }
 
-    // MARK: - DailyCheckIn 기반 헬퍼
+    // MARK: - 체크인 데이터 접근 및 조작
     
     private func startOfDay(_ date: Date) -> Date {
         Calendar.current.startOfDay(for: date)
@@ -88,6 +85,8 @@ final class HomeViewModel: ObservableObject {
         context.insert(record)
         return record
     }
+    
+    // MARK: - 스트릭 계산 및 저장
     
     private func computeCurrentStreak(context: ModelContext) -> Int {
         let cal = Calendar.current
@@ -124,6 +123,8 @@ final class HomeViewModel: ObservableObject {
         }
         try? context.save()
     }
+
+    // MARK: - 체크인/체크아웃 동작 처리
 
     // 2시간 이상 지연 시 실패 처리(오늘 failed로 마킹) + sleepCount 0 반영
     func checkAndHandleFailedState(
@@ -228,6 +229,8 @@ final class HomeViewModel: ObservableObject {
         }
     }
 
+    // MARK: - 체크아웃 / 실패 처리
+
     // MARK: - 비상 정지: 오늘을 실패 처리하고 상태/통계 동기화
     func emergencyStopToday(
         context: ModelContext,
@@ -253,6 +256,17 @@ final class HomeViewModel: ObservableObject {
             weekDays[todayIndex] = StreakDay(date: weekDays[todayIndex].date, isCompleted: false)
         }
     }
+
+    func performCheckOut() {
+        updateCheckInState(nil)
+        
+        // 오늘의 스트릭을 미완료로 변경
+        if let todayIndex = weekDays.firstIndex(where: { $0.isToday }) {
+            weekDays[todayIndex] = StreakDay(date: weekDays[todayIndex].date, isCompleted: false)
+        }
+    }
+
+    // MARK: - 백필 처리
 
     // MARK: - 백필: 첫 기록 이후의 누락일을 failed로 채워 넣기
     // - 첫 설치(기록 0개)인 경우 아무 것도 하지 않음 → 비어있는 상태 유지
@@ -289,23 +303,4 @@ final class HomeViewModel: ObservableObject {
             try? context.save()
         }
     }
-
-//    // MARK: - (기존) Mock/도우미 로직: 주간 뷰 유지용
-//    // 아래 함수들은 더 이상 호출하지 않도록 HomeView/RecordView를 수정했습니다.
-//    // 필요 시 나중에 제거하세요.
-//    
-//    func updateSleepCountBasedOnStreak(
-//        remainingTimeText: String,
-//        startTimeText: String
-//    ) -> Int? { nil }
-//
-//    func calculateCurrentStreak(
-//        remainingTimeText: String,
-//        startTimeText: String
-//    ) -> Int { 0 }
-//
-//    func syncCurrentStreak(
-//        remainingTimeText: String,
-//        startTimeText: String
-//    ) -> Int { 0 }
 }
