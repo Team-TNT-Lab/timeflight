@@ -13,6 +13,7 @@ struct CheckInBannerView: View {
     let endTimeText: String
     let hasCheckedInToday: Bool
     let performCheckIn: () -> Void
+    let isGuestUser: Bool
     
     @StateObject private var nfcScanManager = NFCManager()
     @State private var showEmergencyStopAlert = false
@@ -68,13 +69,17 @@ struct CheckInBannerView: View {
 
             Button(action: {
                 if hasCheckedInToday {
-                    // 운행 중: 비상 정지 확인 얼럿
                     showEmergencyStopAlert = true
                 } else {
-                    // 출발 전: NFC 스캔으로 체크인
-                    nfcScanManager.startNFCScan(alertMessage: "기기를 기상 NFC 태그에 가까이 대세요") { message in
-                        if message == "\u{02}enwake" {
-                            performCheckIn()
+                    if isGuestUser {
+                        // 게스트 유저: 카드 없이 바로 체크인
+                        performCheckIn()
+                    } else {
+                        // 정식 유저: NFC 스캔으로 체크인
+                        nfcScanManager.startNFCScan(alertMessage: "기기를 드림카드에 태그해주세요") { message in
+                            if message == "\u{02}enwake" {
+                                performCheckIn()
+                            }
                         }
                     }
                 }
@@ -110,7 +115,7 @@ struct CheckInBannerView: View {
             .alert("비상 정지하시겠어요?", isPresented: $showEmergencyStopAlert) {
                 Button("비상 정지하기", role: .none) {
                     // 확인을 누르면 NFC 태그 안내를 띄워 스캔을 시작합니다.
-                    nfcScanManager.startNFCScan(alertMessage: "비상 정지를 위해 기기를 기상 NFC 태그에 가까이 대세요") { _ in
+                    nfcScanManager.startNFCScan(alertMessage: "기기를 드림카드에 태그해주세요") { _ in
                         // 필요 시 스캔 성공 시점에 비상 정지 처리 로직을 연결하세요.
                         // 현재 NFCManager는 특정 페이로드("\u{02}enwake")에만 성공 콜백을 전달합니다.
                     }
