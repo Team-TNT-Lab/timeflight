@@ -7,7 +7,9 @@
 		<string>Afacad-Regular.ttf</string>
 		<string>Afacad-Bold.ttf</string>
 		<string>116watermelon.otf</string>
-		<string>느림보고딕 Regular.otf</string>
+		<string>느림보고딕 Regular.otf</string>
 	</array>
+	<key>NSFaceIDUsageDescription</key>
+	<string>수면 체크인을 위해 Face ID 인증이 필요합니다.</string>
 </dict>
 </plist>
