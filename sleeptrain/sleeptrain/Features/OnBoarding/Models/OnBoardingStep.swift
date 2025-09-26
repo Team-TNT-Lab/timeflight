@@ -12,6 +12,7 @@ enum OnBoardingStep: Hashable, CaseIterable {
     case intro
     case nameInput
     case timeSetting
+    case screenTimeRequest
     case appSelection
     case nfcIntro
     case nfcTagExample

@@ -28,6 +28,9 @@ enum SleepTimeCalculator {
             (24 * 60) - bedTotalMinutes + wakeTotalMinutes
 
         let hours = sleepMinutes / 60
-        return "\(hours)시간 자게 돼요"
+        let minutes = sleepMinutes % 60
+        return minutes > 0 ?
+            "\(hours)시간 \(minutes)분 자게 돼요" :
+            "\(hours)시간 자게 돼요"
     }
 }
