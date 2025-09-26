@@ -11,6 +11,8 @@ import SwiftUI
 
 struct AppSelectionView: View {
     let onNext: () -> Void
+    let showNextButton: Bool
+    let hideTabBar: Bool
 
     @Environment(\.modelContext) private var modelContext
     @Query private var userSettings: [UserSettings]
@@ -18,20 +20,36 @@ struct AppSelectionView: View {
     @StateObject private var authManager = AuthorizationManager()
     @EnvironmentObject var screenTimeManager: ScreenTimeManager
 
-    init(_ onNext: @escaping () -> Void) {
+    init(_ onNext: @escaping () -> Void, showNextButton: Bool = true, hideTabBar: Bool = false) {
         self.onNext = onNext
+        self.showNextButton = showNextButton
+        self.hideTabBar = hideTabBar
     }
 
     var body: some View {
         FamilyActivityPicker(selection: $screenTimeManager.selection)
-            .safeAreaInset(edge: .bottom) {
-                PrimaryButton(buttonText: "다음") {
-                    saveSelectedApps()
+            .safeAreaInset(edge: .bottom, content: {
+                if showNextButton {
+                    PrimaryButton(buttonText: "다음") {
+                        saveSelectedAppsAndNext()
+                    }
                 }
-            }
+            })
             .onAppear {
                 loadExistingSelection()
-            }.task {
+                if hideTabBar {
+                    UITabBar.appearance().isHidden = true
+                }
+            }
+            .onDisappear {
+                if !showNextButton {
+                    saveSelectedApps()
+                }
+                if hideTabBar {
+                    UITabBar.appearance().isHidden = false
+                }
+            }
+            .task {
                 if !authManager.isAuthorized {
                     authManager.requestAuthorization()
                 }
@@ -45,6 +63,18 @@ struct AppSelectionView: View {
     }
 
     private func saveSelectedApps() {
+        do {
+            try userSettingsManager.saveBlockedApps(
+                screenTimeManager.selection,
+                context: modelContext,
+                userSettings: userSettings
+            )
+        } catch {
+            print(error)
+        }
+    }
+
+    private func saveSelectedAppsAndNext() {
         do {
             try userSettingsManager.saveBlockedApps(
                 screenTimeManager.selection,
