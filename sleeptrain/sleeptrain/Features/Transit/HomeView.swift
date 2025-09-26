@@ -7,11 +7,13 @@
 
 import SwiftUI
 import Foundation
+import SwiftData
 
 struct HomeView: View {
     @EnvironmentObject var authManager: AuthorizationManager
     @StateObject var screenTimeManager =  ScreenTimeManager()
     @StateObject private var nfcScanManager = NFCManager()
+    @Query private var userSettings: [UserSettings]
 
     @StateObject private var trainTicketViewModel = TrainTicketViewModel()
     @StateObject private var homeViewModel = HomeViewModel()
@@ -51,7 +53,11 @@ struct HomeView: View {
                             ) { newSleepCount in
                                 trainTicketViewModel.sleepCount = newSleepCount
                             }
-                        }
+                        },
+                        performCheckOut: {
+                            homeViewModel.performCheckOut()
+                        },
+                        isGuestUser: userSettings.first?.isGuestUser ?? true
                     )
                 }
             }

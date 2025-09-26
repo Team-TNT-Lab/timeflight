@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import LocalAuthentication  // Face ID
 
 struct CheckInBannerView: View {
     let remainingTimeText: String
@@ -13,9 +14,12 @@ struct CheckInBannerView: View {
     let endTimeText: String
     let hasCheckedInToday: Bool
     let performCheckIn: () -> Void
+    let performCheckOut: () -> Void
+    let isGuestUser: Bool
     
     @StateObject private var nfcScanManager = NFCManager()
     @State private var showEmergencyStopAlert = false
+    @State private var showFaceIDAlert = false
     
     // 현재 시간부터 기상 시간까지 남은 시간 계산
     private var timeUntilWakeUp: String {
@@ -68,18 +72,21 @@ struct CheckInBannerView: View {
 
             Button(action: {
                 if hasCheckedInToday {
-                    // 운행 중: 비상 정지 확인 얼럿
                     showEmergencyStopAlert = true
                 } else {
-                    // 출발 전: NFC 스캔으로 체크인
-                    nfcScanManager.startNFCScan(alertMessage: "기기를 기상 NFC 태그에 가까이 대세요") { message in
-                        if message == "\u{02}enwake" {
-                            performCheckIn()
+                    if isGuestUser {
+                        authenticateWithFaceID() // 게스트유저 Face ID 인증
+                    } else {
+                        nfcScanManager.startNFCScan(alertMessage: "기기를 드림카드에 태그해주세요") { message in
+                            if message == "\u{02}enwake" {
+                                performCheckIn()
+                            }
                         }
                     }
                 }
             }) {
-                Text(hasCheckedInToday ? "비상 정지하기" : "지금 출발하기")
+                Text(hasCheckedInToday ? "운행 종료하기" : "지금 출발하기")
+                    .font(.system(size: 18, weight: .bold))
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(
@@ -107,18 +114,68 @@ struct CheckInBannerView: View {
             ) : false)
             .padding(.top, hasCheckedInToday ? 200 : 90)
             .padding(.horizontal, 16)
-            .alert("비상 정지하시겠어요?", isPresented: $showEmergencyStopAlert) {
-                Button("비상 정지하기", role: .none) {
-                    // 확인을 누르면 NFC 태그 안내를 띄워 스캔을 시작합니다.
-                    nfcScanManager.startNFCScan(alertMessage: "비상 정지를 위해 기기를 기상 NFC 태그에 가까이 대세요") { _ in
-                        // 필요 시 스캔 성공 시점에 비상 정지 처리 로직을 연결하세요.
-                        // 현재 NFCManager는 특정 페이로드("\u{02}enwake")에만 성공 콜백을 전달합니다.
+            .alert("운행을 종료하시겠어요?", isPresented: $showEmergencyStopAlert) {
+                Button("운행 종료하기", role: .none) {
+                    if isGuestUser {
+                        authenticateWithFaceIDForCheckOut()  // 게스트: Face ID
+                    } else {
+                        nfcScanManager.startNFCScan(alertMessage: "기기를 드림카드에 태그해주세요") { _ in
+                            performCheckOut()  // NFC 성공 시 체크아웃
+                        }
                     }
                 }
                 Button("취소", role: .cancel) {}
             } message: {
                 Text("지금 멈추면 연속 기록이 사라져요.")
             }
+            .alert("Face ID 인증", isPresented: $showFaceIDAlert) {
+                Button("확인") {
+                    performCheckIn()
+                }
+                Button("취소", role: .cancel) { }
+            }
+        }
+    }
+    
+    private func authenticateWithFaceID() {
+        let context = LAContext()
+        var error: NSError?
+        
+        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+            let reason = "수면 체크인을 위해 Face ID 인증이 필요합니다."
+            
+            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, authenticationError in
+                DispatchQueue.main.async {
+                    if success {
+                        performCheckIn()
+                    } else {
+                        print("Face ID 인증 실패")
+                    }
+                }
+            }
+        } else {
+            performCheckIn()
+        }
+    }
+
+    private func authenticateWithFaceIDForCheckOut() {
+        let context = LAContext()
+        var error: NSError?
+        
+        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+            let reason = "운행 종료를 위해 Face ID 인증이 필요합니다."
+            
+            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, authenticationError in
+                DispatchQueue.main.async {
+                    if success {
+                        performCheckOut()
+                    } else {
+                        print("Face ID 인증 실패")
+                    }
+                }
+            }
+        } else {
+            performCheckOut()
         }
     }
 }

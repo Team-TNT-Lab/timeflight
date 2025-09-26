@@ -316,39 +316,14 @@ final class HomeViewModel: ObservableObject {
             return "0분"
         }
     }
-//    /// 목데이터 기준 특정 시각부터 출발 시각까지 남은 시간을 계산
-//    func calculateMockRemainingTimeToDeparture(from referenceDate: Date, startTimeText: String) -> String {
-//        let formatter = DateFormatter()
-//        formatter.dateFormat = "HH:mm"
-//
-//        guard let departureTimeToday = formatter.date(from: startTimeText) else {
-//            return ""
-//        }
-//
-//        let calendar = Calendar.current
-//        let referenceComponents = calendar.dateComponents([.year, .month, .day], from: referenceDate)
-//        let departureComponents = calendar.dateComponents([.hour, .minute], from: departureTimeToday)
-//
-//        var combinedComponents = DateComponents()
-//        combinedComponents.year = referenceComponents.year
-//        combinedComponents.month = referenceComponents.month
-//        combinedComponents.day = referenceComponents.day
-//        combinedComponents.hour = departureComponents.hour
-//        combinedComponents.minute = departureComponents.minute
-//
-//        guard var departureDate = calendar.date(from: combinedComponents) else {
-//            return ""
-//        }
-//
-//        let maxDelay = departureDate.addingTimeInterval(2 * 3600)
-//        if referenceDate > maxDelay {
-//            departureDate = calendar.date(byAdding: .day, value: 1, to: departureDate)!
-//        }
-//
-//        let diff = calendar.dateComponents([.hour, .minute], from: referenceDate, to: departureDate)
-//        let hours = diff.hour ?? 0
-//        let minutes = diff.minute ?? 0
-//
-//        return "\(hours)시간 \(minutes)분"
-//    }
+
+    func performCheckOut() {
+        hasCheckedInToday = false
+        todayCheckInTime = nil
+        
+        // 오늘의 스트릭을 미완료로 변경
+        if let todayIndex = weekDays.firstIndex(where: { $0.isToday }) {
+            weekDays[todayIndex] = StreakDay(date: weekDays[todayIndex].date, isCompleted: false)
+        }
+    }
 }
