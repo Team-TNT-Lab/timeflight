@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import LocalAuthentication  // Face ID
 
 struct CheckInBannerView: View {
     let remainingTimeText: String
@@ -17,6 +18,7 @@ struct CheckInBannerView: View {
     
     @StateObject private var nfcScanManager = NFCManager()
     @State private var showEmergencyStopAlert = false
+    @State private var showFaceIDAlert = false
     
     // 현재 시간부터 기상 시간까지 남은 시간 계산
     private var timeUntilWakeUp: String {
@@ -72,10 +74,8 @@ struct CheckInBannerView: View {
                     showEmergencyStopAlert = true
                 } else {
                     if isGuestUser {
-                        // 게스트 유저: 카드 없이 바로 체크인
-                        performCheckIn()
+                        authenticateWithFaceID() // 게스트유저 Face ID 인증
                     } else {
-                        // 정식 유저: NFC 스캔으로 체크인
                         nfcScanManager.startNFCScan(alertMessage: "기기를 드림카드에 태그해주세요") { message in
                             if message == "\u{02}enwake" {
                                 performCheckIn()
@@ -84,7 +84,7 @@ struct CheckInBannerView: View {
                     }
                 }
             }) {
-                Text(hasCheckedInToday ? "비상 정지하기" : "지금 출발하기")
+                Text(hasCheckedInToday ? "운행 종료하기" : "지금 출발하기")
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(
@@ -112,8 +112,8 @@ struct CheckInBannerView: View {
             ) : false)
             .padding(.top, hasCheckedInToday ? 200 : 90)
             .padding(.horizontal, 16)
-            .alert("비상 정지하시겠어요?", isPresented: $showEmergencyStopAlert) {
-                Button("비상 정지하기", role: .none) {
+            .alert("운행을 종료하시겠어요?", isPresented: $showEmergencyStopAlert) {
+                Button("운행 종료하기", role: .none) {
                     // 확인을 누르면 NFC 태그 안내를 띄워 스캔을 시작합니다.
                     nfcScanManager.startNFCScan(alertMessage: "기기를 드림카드에 태그해주세요") { _ in
                         // 필요 시 스캔 성공 시점에 비상 정지 처리 로직을 연결하세요.
@@ -124,6 +124,33 @@ struct CheckInBannerView: View {
             } message: {
                 Text("지금 멈추면 연속 기록이 사라져요.")
             }
+            .alert("Face ID 인증", isPresented: $showFaceIDAlert) {
+                Button("확인") {
+                    performCheckIn()
+                }
+                Button("취소", role: .cancel) { }
+            }
+        }
+    }
+    
+    private func authenticateWithFaceID() {
+        let context = LAContext()
+        var error: NSError?
+        
+        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+            let reason = "수면 체크인을 위해 Face ID 인증이 필요합니다."
+            
+            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, authenticationError in
+                DispatchQueue.main.async {
+                    if success {
+                        performCheckIn()
+                    } else {
+                        print("Face ID 인증 실패")
+                    }
+                }
+            }
+        } else {
+            performCheckIn()
         }
     }
 }
