@@ -60,8 +60,8 @@ struct CardManagementView: View {
                         }
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
-                        .background(Color.blue)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .background(Color.blue.opacity(0.6))
+                        .clipShape(RoundedRectangle(cornerRadius: 25))
                     }
                     .padding(.horizontal, 20)
                 }
@@ -106,8 +106,8 @@ struct CardManagementView: View {
                         }
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
-                        .background(Color.red)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .background(Color.red.opacity(0.6))
+                        .clipShape(RoundedRectangle(cornerRadius: 25))
                     }
                     .padding(.horizontal, 20)
                 }
