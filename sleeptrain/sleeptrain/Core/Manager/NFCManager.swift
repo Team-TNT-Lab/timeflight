@@ -12,6 +12,8 @@ class NFCManager: NSObject, ObservableObject, NFCNDEFReaderSessionDelegate {
     @Published var nfcMessage: String = "NFC대기"
     private var nfcSession: NFCNDEFReaderSession?
     private var completion: ((String?) -> Void)?
+    private var successScan: Bool = false
+    private var successMessage: String?
 
     func startNFCScan(alertMessage: String, completion: @escaping (String?) -> Void) {
         guard NFCNDEFReaderSession.readingAvailable else {
@@ -48,9 +50,11 @@ class NFCManager: NSObject, ObservableObject, NFCNDEFReaderSessionDelegate {
             self.nfcMessage = messageText
             // 특정 페이로드만 성공으로 간주
             if messageText == "\u{02}enwake" {
-                self.completion?(messageText)
+                self.successScan = true
+                self.successMessage = messageText
             } else {
-                self.completion?(nil)
+                self.successScan = false
+                self.successMessage = nil
             }
         }
         session.invalidate()
@@ -65,9 +69,18 @@ class NFCManager: NSObject, ObservableObject, NFCNDEFReaderSessionDelegate {
                     self.nfcMessage = "스캔취소"
                 }
             }
-            // 취소/실패 모두 상위에 알림
-            self.completion?(nil)
+
+            // 성공했을때만 completion실행
+            if self.successScan {
+                self.completion?(self.successMessage)
+            } else {
+                self.completion?(nil)
+            }
+
+            // 설정리셋
+            self.successScan = false
+            self.successMessage = nil
+            self.completion = nil
         }
     }
 }
-
