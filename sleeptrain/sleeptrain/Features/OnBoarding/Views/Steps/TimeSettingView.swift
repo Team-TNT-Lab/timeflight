@@ -10,6 +10,8 @@ import SwiftUI
 
 struct TimeSettingView: View {
     let onNext: () -> Void
+    let buttonText: String
+    let hideTabBar: Bool
 
     @Environment(\.modelContext) private var modelContext
     @Query private var userSettings: [UserSettings]
@@ -20,8 +22,10 @@ struct TimeSettingView: View {
     @State private var isShowingBedTimePicker: Bool = false
     @State private var isShowingWakeTimePicker: Bool = false
 
-    init(_ onNext: @escaping () -> Void) {
+    init(_ onNext: @escaping () -> Void, buttonText: String = "다음", hideTabBar: Bool = false) {
         self.onNext = onNext
+        self.buttonText = buttonText
+        self.hideTabBar = hideTabBar
     }
 
     var body: some View {
@@ -72,9 +76,14 @@ struct TimeSettingView: View {
                 }
             }
             .padding(.all, 20)
-        }.safeAreaInset(edge: .bottom, content: {
-            PrimaryButton(buttonText: "다음") {
-                saveTimeSettings()
+        }
+        .toolbar(hideTabBar ? .hidden : .visible, for: .tabBar)
+        .safeAreaInset(edge: .bottom, content: {
+            VStack(spacing: 0) {
+                Spacer().frame(height: 20)
+                PrimaryButton(buttonText: LocalizedStringKey(buttonText)) {
+                    saveTimeSettings()
+                }
             }
         })
         .onAppear {
