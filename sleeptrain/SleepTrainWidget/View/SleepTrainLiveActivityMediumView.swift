@@ -16,9 +16,9 @@ struct SleepTrainLiveActivityMediumView: View {
         VStack(spacing: 16) {
             // 상단 시간 표시
             HStack {
-                TargetTimeTextView(time: context.attributes.targetDepartureTime)
+                TargetTimeTextView(time: context.state.targetDepartureTime)
                 Spacer()
-                TargetTimeTextView(time: context.attributes.targetArrivalTime)
+                TargetTimeTextView(time: context.state.targetArrivalTime)
             }
             
             SleepTrainInfoView(context: context)

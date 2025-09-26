@@ -16,20 +16,22 @@ struct SleepTrainInfoView: View {
             HStack(spacing: 10) {
                 StationTextView(stationString: context.attributes.departureDayString)
                 
-                TrainProgressBarView(
-                    progress: calculateJourneyProgress(
-                        from: context.state.actualDepartureTime,
-                        to: context.attributes.targetArrivalTime,
-                        current: context.state.currentTime
+                VStack {
+                    TrainProgressBarView(
+                        progress: calculateJourneyProgress(
+                            from: context.state.actualDepartureTime,
+                            to: context.state.targetArrivalTime,
+                            current: context.state.currentTime
+                        )
                     )
-                )
+                }
                 
                 StationTextView(stationString: context.attributes.arrivalDayString)
             }
             HStack {
                 StatusIndicatorView(
-                    targetDepartureTime: context.attributes.targetDepartureTime,
-                    targetArrivalTime: context.attributes.targetArrivalTime,
+                    targetDepartureTime: context.state.targetDepartureTime,
+                    targetArrivalTime: context.state.targetArrivalTime,
                     status: context.state.status,
                     currentTime: context.state.currentTime
                 )

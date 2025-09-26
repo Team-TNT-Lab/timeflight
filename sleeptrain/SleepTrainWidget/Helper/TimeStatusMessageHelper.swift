@@ -10,7 +10,7 @@ import SwiftUI
 
 func timeRemaining(from currentTime: Date = Date.now, to time: Date) -> String {
     let formatter = DateComponentsFormatter()
-    formatter.allowedUnits = [.hour, .minute]
+    formatter.allowedUnits = [.hour, .minute, .second]
     formatter.unitsStyle = .abbreviated
     
     formatter.calendar?.locale = Locale(identifier: "en_US")

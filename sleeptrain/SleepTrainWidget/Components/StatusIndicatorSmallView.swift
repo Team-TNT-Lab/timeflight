@@ -14,15 +14,16 @@ struct StatusIndicatorSmallView: View {
     var currentTime: Date
     
     var body: some View {
-        Text(
-            getTimeMessage(
-                status: status,
-                targetDepartureTime: targetDepartureTime,
-                targetArrivalTime: targetArrivalTime,
-                currentTime: currentTime
-            )
-        )
-        .font(.system(size: 12, weight: .bold))
-        .foregroundStyle(getMessageColor(status: status))
+//        Text(
+//            getTimeMessage(
+//                status: status,
+//                targetDepartureTime: targetDepartureTime,
+//                targetArrivalTime: targetArrivalTime,
+//                currentTime: currentTime
+//            )
+//        )
+        Text(targetDepartureTime, style: .timer)
+            .monospacedDigit()
+            .frame(width: 60)
     }
 }

@@ -51,17 +51,27 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
         }
     }
     
-    func userNotificationCenter(
-        _ center: UNUserNotificationCenter,
-        didReceive response: UNNotificationResponse,
-        withCompletionHandler completionHandler: @escaping () -> Void
-    ) {
-        LiveActivityManager.shared.startLiveActivity(
-            targetDepartureTime: Date.now.addingTimeInterval(3600),
-            targetArrivalTime: Date.now.addingTimeInterval(7200),
-            departureDayString: "MON",
-            arrivalDayString: "TUE"
-        )
-        completionHandler()
-    }
+//    func userNotificationCenter(
+//        _ center: UNUserNotificationCenter,
+//        didReceive response: UNNotificationResponse,
+//        withCompletionHandler completionHandler: @escaping () -> Void
+//    ) {
+//        print("a")
+//        if LiveActivityManager.shared.isActivityEmpty {
+//            LiveActivityManager.shared.startLiveActivity(
+//                targetDepartureTime: Date.now.addingTimeInterval(3600),
+//                targetArrivalTime: Date.now.addingTimeInterval(7200),
+//                departureDayString: "MON",
+//                arrivalDayString: "TUE"
+//            )
+//        } else {
+//            LiveActivityManager.shared.updateNotificationActivity(
+//                targetDepartureTime: Date.now.addingTimeInterval(3600),
+//                targetArrivalTime: Date.now.addingTimeInterval(7200),
+//                departureDayString: "MON",
+//                arrivalDayString: "TUE"
+//            )
+//        }
+//        completionHandler()
+//    }
 }
