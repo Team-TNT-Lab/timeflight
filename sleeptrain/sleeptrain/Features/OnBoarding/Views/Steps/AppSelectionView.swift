@@ -35,18 +35,13 @@ struct AppSelectionView: View {
                     }
                 }
             })
+            .toolbar(hideTabBar ? .hidden : .visible, for: .tabBar)
             .onAppear {
                 loadExistingSelection()
-                if hideTabBar {
-                    UITabBar.appearance().isHidden = true
-                }
             }
             .onDisappear {
                 if !showNextButton {
                     saveSelectedApps()
-                }
-                if hideTabBar {
-                    UITabBar.appearance().isHidden = false
                 }
             }
             .task {

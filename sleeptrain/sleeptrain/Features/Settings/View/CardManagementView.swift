@@ -87,12 +87,9 @@ struct CardManagementView: View {
         }
         .navigationTitle("카드 관리")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .tabBar)
         .onAppear {
-            UITabBar.appearance().isHidden = true
             isGuestUserState = userSettings.first?.isGuestUser ?? true
-        }
-        .onDisappear {
-            UITabBar.appearance().isHidden = false
         }
         .alert("카드 삭제", isPresented: $showingDeleteAlert) {
             Button("삭제", role: .destructive) {
