@@ -351,4 +351,14 @@ final class HomeViewModel: ObservableObject {
 //
 //        return "\(hours)시간 \(minutes)분"
 //    }
+
+    func performCheckOut() {
+        hasCheckedInToday = false
+        todayCheckInTime = nil
+        
+        // 오늘 날짜의 스트릭을 미완료로 변경
+        if let todayIndex = weekDays.firstIndex(where: { $0.isToday }) {
+            weekDays[todayIndex] = StreakDay(date: weekDays[todayIndex].date, isCompleted: false)
+        }
+    }
 }

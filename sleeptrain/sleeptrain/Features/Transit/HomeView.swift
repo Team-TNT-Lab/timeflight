@@ -54,6 +54,9 @@ struct HomeView: View {
                                 trainTicketViewModel.sleepCount = newSleepCount
                             }
                         },
+                        performCheckOut: {
+                            homeViewModel.performCheckOut()
+                        },
                         isGuestUser: userSettings.first?.isGuestUser ?? true
                     )
                 }
