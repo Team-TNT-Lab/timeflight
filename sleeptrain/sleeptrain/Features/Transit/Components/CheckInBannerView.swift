@@ -86,6 +86,7 @@ struct CheckInBannerView: View {
                 }
             }) {
                 Text(hasCheckedInToday ? "운행 종료하기" : "지금 출발하기")
+                    .font(.system(size: 18, weight: .bold))
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(
