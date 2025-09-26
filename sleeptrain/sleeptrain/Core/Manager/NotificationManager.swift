@@ -7,20 +7,24 @@
 
 import UserNotifications
 
+enum NotificationAuthorizationStatus {
+    case authorized, denied, notDetermined
+}
+
 class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterDelegate {
     static let shared = NotificationManager()
     
-    func requestAuthorization() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            #if DEBUG
-            if let error = error {
-                print("Error requesting notification authorization: \(error)")
-            } else {
-                print("Notification permission granted: \(granted)")
-            }
-            #endif
+    func requestAuthorization() async -> Bool {
+        let options: UNAuthorizationOptions = [.alert, .sound, .badge]
+        do {
+            let granted = try await UNUserNotificationCenter.current().requestAuthorization(options: options)
+            UNUserNotificationCenter.current().delegate = self
+            print("Notification permission granted: \(granted)")
+            return granted
+        } catch {
+            print("Error requesting notification authorization: \(error)")
+            return false
         }
-        UNUserNotificationCenter.current().delegate = self
     }
     
     func scheduleNotification(at date: Date) {
@@ -48,6 +52,26 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
                 print("Daily notification scheduled at \(date)")
             }
             #endif
+        }
+    }
+
+    @MainActor
+    func getCurrentNotificationStatus() async -> NotificationAuthorizationStatus {
+        let status = await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
+        
+        switch status {
+        case .authorized:
+            return .authorized
+        case .notDetermined:
+            return .notDetermined
+        case .denied:
+            return .denied
+        case .provisional:
+            return .authorized
+        case .ephemeral:
+            return .authorized
+        @unknown default:
+            return .denied
         }
     }
     

@@ -13,8 +13,9 @@ struct ScreenTimeRequestView: View {
         self.onNext = onNext
     }
 
-    @State private var isImageVisible: Bool = false
     @EnvironmentObject var authManager: AuthorizationManager
+    @StateObject private var notificationManager = NotificationManager.shared
+    @State private var isImageVisible: Bool = false
     var body: some View {
         ZStack {
             Color.clear
@@ -40,15 +41,20 @@ struct ScreenTimeRequestView: View {
                 .padding(.leading, 30)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 PrimaryButton(buttonText: "허용하기") {
-                    if authManager.isAuthorized {
-                        onNext()
-                    }
-                    else {
-                        authManager.requestAuthorization()
+                    Task {
+                        let notificationGranted = await notificationManager.requestAuthorization()
+
+                        if notificationGranted {
+                            authManager.requestAuthorization()
+                        }
+
+                        if authManager.isAuthorized {
+                            onNext()
+                        }
                     }
                 }
-            }.onChange(of: authManager.isAuthorized) {
-                if authManager.isAuthorized {
+            }.onChange(of: authManager.isAuthorized) { _, isAuthorized in
+                if isAuthorized {
                     onNext()
                 }
             }
@@ -58,4 +64,5 @@ struct ScreenTimeRequestView: View {
 
 #Preview {
     ScreenTimeRequestView { print("Hi") }
+        .environmentObject(AuthorizationManager())
 }
