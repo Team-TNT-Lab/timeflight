@@ -1,5 +1,5 @@
 //
-//  Gradients.swift
+//  ShapeStyle+Gradient.swift
 //  sleeptrain
 //
 //  Created by bishoe01 on 9/25/25.
