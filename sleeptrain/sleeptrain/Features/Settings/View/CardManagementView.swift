@@ -21,22 +21,12 @@ struct CardManagementView: View {
         VStack(spacing: 0) {
             if isGuestUserState {
                 VStack(spacing: 20) {
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.white.opacity(0.1))
+                    Image("nocard")
+                        .resizable()
+                        .scaledToFit()
                         .frame(height: 200)
-                        .overlay(
-                            VStack(spacing: 12) {
-                                Image(systemName: "creditcard")
-                                    .font(.system(size: 40))
-                                    .foregroundColor(.white.opacity(0.6))
-                                
-                                Text("등록된 카드가 없습니다")
-                                    .font(.system(size: 16))
-                                    .foregroundColor(.white.opacity(0.6))
-                            }
-                        )
                         .padding(.horizontal, 20)
-                    
+                        .padding(.vertical, 24)
                     Button(action: {
                         print("카드 등록 버튼 클릭됨")
                         nfcScanManager.startNFCScan(alertMessage: "카드 등록 완료!") { message in
@@ -66,51 +56,31 @@ struct CardManagementView: View {
                     .padding(.horizontal, 20)
                 }
             } else {
-                VStack(spacing: 20) {
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.white.opacity(0.1))
-                        .frame(height: 120)
-                        .overlay(
-                            HStack {
-                                Image(systemName: "creditcard.fill")
-                                    .font(.system(size: 30))
-                                    .foregroundColor(.blue)
-                                
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("드림 카드")
-                                        .font(.system(size: 18, weight: .semibold))
-                                        .foregroundColor(.white)
-                                    
-                                    Text("등록됨")
-                                        .font(.system(size: 14))
-                                        .foregroundColor(.white.opacity(0.6))
-                                }
-                                
-                                Spacer()
-                            }
-                            .padding(.horizontal, 20)
-                        )
-                        .padding(.horizontal, 20)
-                    
-                    Button(action: {
-                        showingDeleteAlert = true
-                    }) {
-                        HStack(spacing: 12) {
-                            Image(systemName: "trash")
-                                .font(.system(size: 20))
-                                .foregroundColor(.white)
-                            
-                            Text("카드 삭제")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(.white)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 50)
-                        .background(Color.red.opacity(0.6))
-                        .clipShape(RoundedRectangle(cornerRadius: 25))
-                    }
+                Image("card")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 200)
                     .padding(.horizontal, 20)
+                    .padding(.vertical, 24)
+                
+                Button(action: {
+                    showingDeleteAlert = true
+                }) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "trash")
+                            .font(.system(size: 20))
+                            .foregroundColor(.white)
+                        
+                        Text("카드 삭제")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.white)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 50)
+                    .background(Color.red.opacity(0.6))
+                    .clipShape(RoundedRectangle(cornerRadius: 25))
                 }
+                .padding(.horizontal, 20)
             }
             
             Spacer()
