@@ -24,7 +24,7 @@ final class UserSettings {
         targetArrivalTime: Date,
         blockedApps: FamilyActivitySelection = FamilyActivitySelection(),
         isOnboardingCompleted: Bool = false,
-        isGuestUser: Bool = false
+        isGuestUser: Bool = true
     ) {
         self.name = name
         self.targetDepartureTime = targetDepartureTime
