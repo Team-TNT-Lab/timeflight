@@ -17,6 +17,7 @@ struct NfcTagExampleView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Query private var userSettings: [UserSettings]
+    @StateObject private var userSettingsManager = UserSettingsManager()
     @State private var isImageVisible = false
     let nfcScanManager = NFCManager()
 
@@ -44,7 +45,7 @@ struct NfcTagExampleView: View {
                 VStack(spacing: 17) {
                     PrimaryButton(buttonText: "카드 등록하기") {
                         nfcScanManager.startNFCScan(alertMessage: "카드 태그 완료!") { _ in
-                            onNext()
+                            toggleGuestUSer()
                         }
                     }
                     Button {
@@ -76,6 +77,15 @@ struct NfcTagExampleView: View {
                     )
                 )
             }
+        }
+    }
+
+    private func toggleGuestUSer() {
+        do {
+            try userSettingsManager.ToggleGuestUser(context: modelContext, userSettings: userSettings)
+            onNext()
+        } catch {
+            print("게스트 유저 토글 실패 \(error)")
         }
     }
 }

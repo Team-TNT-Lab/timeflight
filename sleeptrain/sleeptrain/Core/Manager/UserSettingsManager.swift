@@ -52,4 +52,10 @@ class UserSettingsManager: ObservableObject {
         settings.isOnboardingCompleted = true
         try context.save()
     }
+
+    func ToggleGuestUser(context: ModelContext, userSettings: [UserSettings]) throws {
+        let settings = getOrCreateSettings(context: context, userSettings: userSettings)
+        settings.isGuestUser.toggle()
+        try context.save()
+    }
 }
