@@ -15,9 +15,8 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
     static let shared = NotificationManager()
     
     func requestAuthorization() async -> Bool {
-        let options: UNAuthorizationOptions = [.alert, .sound, .badge]
         do {
-            let granted = try await UNUserNotificationCenter.current().requestAuthorization(options: options)
+            let granted = try await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
             UNUserNotificationCenter.current().delegate = self
             print("Notification permission granted: \(granted)")
             return granted
