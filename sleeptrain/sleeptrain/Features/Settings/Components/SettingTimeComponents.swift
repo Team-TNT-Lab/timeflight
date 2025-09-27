@@ -25,17 +25,43 @@ struct TimeField: View {
 struct TimePickerSheet: View {
     @Binding var date: Date
     @Binding var isPresented: Bool
+    var isForBedTime: Bool = false
+    var isForWakeTime: Bool = false
 
     var body: some View {
         VStack(spacing: 0) {
-            DatePicker("", selection: $date, displayedComponents: .hourAndMinute)
+            DatePicker("", selection: Binding(
+                get: { date },
+                set: { newDate in
+                    if isForBedTime {
+                        if SleepTimeCalculator.isTimeInBedTimeRange(newDate) {
+                            date = newDate
+                        } else {
+                            // 시간 범위 벗어나면 11시 취침
+                            let calendar = Calendar.current
+
+                            date = calendar.date(bySettingHour: 23, minute: 0, second: 0, of: newDate) ?? newDate
+                        }
+                    } else if isForWakeTime {
+                        if SleepTimeCalculator.isTimeInWakeTimeRange(newDate) {
+                            date = newDate
+                        } else {
+                            // 시간 범위 벗어나면 7시 기상
+                            let calendar = Calendar.current
+                            date = calendar.date(bySettingHour: 7, minute: 0, second: 0, of: newDate) ?? newDate
+                        }
+                    } else {
+                        date = newDate
+                    }
+                }
+            ), displayedComponents: .hourAndMinute)
                 .datePickerStyle(.wheel)
                 .labelsHidden()
                 .padding(.top, 10)
 
             Button(action: { isPresented = false }) {
                 Text("완료")
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(.subTitle)
                     .frame(maxWidth: .infinity, minHeight: 50)
                     .contentShape(Capsule())
             }
@@ -52,12 +78,14 @@ struct TimePickerSheetWrapper: View {
     let isPresented: Binding<Bool>
     let date: Date
     let setDate: (Date) -> Void
+    var isForBedTime: Bool = false
+    var isForWakeTime: Bool = false
 
     var body: some View {
         let binding = Binding<Date>(
             get: { date },
             set: { setDate($0) }
         )
-        TimePickerSheet(date: binding, isPresented: isPresented)
+        TimePickerSheet(date: binding, isPresented: isPresented, isForBedTime: isForBedTime, isForWakeTime: isForWakeTime)
     }
 }

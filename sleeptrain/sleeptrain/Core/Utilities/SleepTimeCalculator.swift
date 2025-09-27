@@ -9,6 +9,15 @@ import Foundation
 
 enum SleepTimeCalculator {
     static func calculateSleepDuration(bedTime: Date, wakeTime: Date) -> String {
+        let sleepMinutes = calculateSleepMinutes(bedTime: bedTime, wakeTime: wakeTime)
+        let hours = sleepMinutes / 60
+        let minutes = sleepMinutes % 60
+        return minutes > 0 ?
+            "\(hours)시간 \(minutes)분 자게 돼요" :
+            "\(hours)시간 자게 돼요"
+    }
+
+    static func calculateSleepMinutes(bedTime: Date, wakeTime: Date) -> Int {
         let calendar = Calendar.current
 
         // 자정을 넘겼을때
@@ -27,10 +36,25 @@ enum SleepTimeCalculator {
             wakeTotalMinutes - bedTotalMinutes :
             (24 * 60) - bedTotalMinutes + wakeTotalMinutes
 
-        let hours = sleepMinutes / 60
-        let minutes = sleepMinutes % 60
-        return minutes > 0 ?
-            "\(hours)시간 \(minutes)분 자게 돼요" :
-            "\(hours)시간 자게 돼요"
+        return sleepMinutes
+    }
+
+    static func isValidSleepDuration(bedTime: Date, wakeTime: Date, minimumHours: Int = 4) -> Bool {
+        let sleepMinutes = calculateSleepMinutes(bedTime: bedTime, wakeTime: wakeTime)
+        return sleepMinutes >= (minimumHours * 60)
+    }
+
+    static func isTimeInBedTimeRange(_ time: Date) -> Bool {
+        let calendar = Calendar.current
+        let hour = calendar.component(.hour, from: time)
+        // 8PM ~ 2AM
+        return hour >= 20 || hour <= 2
+    }
+
+    static func isTimeInWakeTimeRange(_ time: Date) -> Bool {
+        let calendar = Calendar.current
+        let hour = calendar.component(.hour, from: time)
+        // 3AM ~ 2PM
+        return hour >= 3 && hour <= 14
     }
 }

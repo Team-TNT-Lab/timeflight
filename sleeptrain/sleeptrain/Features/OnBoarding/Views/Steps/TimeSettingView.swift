@@ -21,6 +21,8 @@ struct TimeSettingView: View {
     @State private var wakeTime: Date = .init()
     @State private var isShowingBedTimePicker: Bool = false
     @State private var isShowingWakeTimePicker: Bool = false
+    @State private var showingValidationAlert: Bool = false
+    @State private var validationMessage: String = ""
 
     init(_ onNext: @escaping () -> Void, buttonText: String = "다음", hideTabBar: Bool = false) {
         self.onNext = onNext
@@ -47,9 +49,14 @@ struct TimeSettingView: View {
                 VStack(spacing: 50) {
                     Spacer()
                     VStack(spacing: 15) {
-                        Text("잠드는 시간")
-                            .font(.subTitle)
-                            .foregroundStyle(.white.opacity(0.8))
+                        VStack(spacing: 4) {
+                            Text("잠드는 시간")
+                                .font(.subTitle)
+                                .foregroundStyle(.white.opacity(0.8))
+                            Text("오후 8시 ~ 새벽 2시")
+                                .font(.caption)
+                                .foregroundStyle(.white.opacity(0.5))
+                        }
 
                         Button {
                             isShowingBedTimePicker = true
@@ -59,9 +66,14 @@ struct TimeSettingView: View {
                     }
 
                     VStack(spacing: 15) {
-                        Text("일어나는 시간")
-                            .font(.subTitle)
-                            .foregroundStyle(.white.opacity(0.8))
+                        VStack(spacing: 4) {
+                            Text("일어나는 시간")
+                                .font(.subTitle)
+                                .foregroundStyle(.white.opacity(0.8))
+                            Text("새벽 3시 ~ 오후 2시")
+                                .font(.caption)
+                                .foregroundStyle(.white.opacity(0.5))
+                        }
 
                         Button {
                             isShowingWakeTimePicker = true
@@ -70,9 +82,17 @@ struct TimeSettingView: View {
                         }
                     }
                     Spacer()
-                    Text(sleepDurationText)
-                        .font(.subTitle)
-                        .foregroundStyle(.white.opacity(0.6))
+                    VStack(spacing: 8) {
+                        Text(sleepDurationText)
+                            .font(.subTitle)
+                            .foregroundStyle(isValidTimeSettings ? .white.opacity(0.6) : .red.opacity(0.8))
+
+                        if !isValidTimeSettings {
+                            Text("최소 4시간 이상 자야 해요")
+                                .font(.caption)
+                                .foregroundStyle(.red.opacity(0.7))
+                        }
+                    }
                 }
             }
             .padding(.all, 20)
@@ -82,8 +102,12 @@ struct TimeSettingView: View {
             VStack(spacing: 0) {
                 Spacer().frame(height: 20)
                 PrimaryButton(buttonText: LocalizedStringKey(buttonText)) {
-                    saveTimeSettings()
+                    if validateTimeSettings() {
+                        saveTimeSettings()
+                    }
                 }
+                .disabled(!isValidTimeSettings)
+                .opacity(isValidTimeSettings ? 1.0 : 0.6)
             }
         })
         .onAppear {
@@ -93,15 +117,22 @@ struct TimeSettingView: View {
             TimePickerSheetWrapper(
                 isPresented: $isShowingBedTimePicker,
                 date: bedTime,
-                setDate: { bedTime = $0 }
+                setDate: { bedTime = $0 },
+                isForBedTime: true
             )
         }
         .sheet(isPresented: $isShowingWakeTimePicker) {
             TimePickerSheetWrapper(
                 isPresented: $isShowingWakeTimePicker,
                 date: wakeTime,
-                setDate: { wakeTime = $0 }
+                setDate: { wakeTime = $0 },
+                isForWakeTime: true
             )
+        }
+        .alert("시간 설정 오류", isPresented: $showingValidationAlert) {
+            Button("확인", role: .cancel) {}
+        } message: {
+            Text(validationMessage)
         }
     }
 
@@ -109,14 +140,63 @@ struct TimeSettingView: View {
         SleepTimeCalculator.calculateSleepDuration(bedTime: bedTime, wakeTime: wakeTime)
     }
 
+    private var isValidTimeSettings: Bool {
+        return SleepTimeCalculator.isValidSleepDuration(bedTime: bedTime, wakeTime: wakeTime) &&
+            SleepTimeCalculator.isTimeInBedTimeRange(bedTime) &&
+            SleepTimeCalculator.isTimeInWakeTimeRange(wakeTime)
+    }
+
     private func loadExistingSettings() {
         if let settings = userSettings.first {
-            bedTime = settings.targetDepartureTime
-            wakeTime = settings.targetArrivalTime
+            // 기존 설정이 유효한지 확인하고 필요시 조정
+            let existingBedTime = settings.targetDepartureTime
+            let existingWakeTime = settings.targetArrivalTime
+
+            // 자는 시간 유효성 검증 및 조정
+            if SleepTimeCalculator.isTimeInBedTimeRange(existingBedTime) {
+                bedTime = existingBedTime
+            } else {
+                // 유효하지 않으면 기본값으로 설정
+                bedTime = Calendar.current.date(bySettingHour: 23, minute: 0, second: 0, of: Date()) ?? Date()
+            }
+
+            // 일어나는 시간 유효성 검증 및 조정
+            if SleepTimeCalculator.isTimeInWakeTimeRange(existingWakeTime) {
+                wakeTime = existingWakeTime
+            } else {
+                // 유효하지 않으면 기본값으로 설정
+                wakeTime = Calendar.current.date(bySettingHour: 7, minute: 0, second: 0, of: Date()) ?? Date()
+            }
         } else {
-            bedTime = Calendar.current.date(bySettingHour: 23, minute: 00, second: 0, of: Date()) ?? Date()
-            wakeTime = Calendar.current.date(bySettingHour: 7, minute: 00, second: 0, of: Date()) ?? Date()
+            // 기본값을 제약 조건에 맞게 설정
+            bedTime = Calendar.current.date(bySettingHour: 23, minute: 0, second: 0, of: Date()) ?? Date()
+            wakeTime = Calendar.current.date(bySettingHour: 7, minute: 0, second: 0, of: Date()) ?? Date()
         }
+    }
+
+    private func validateTimeSettings() -> Bool {
+        // 자는 시간 범위
+        if !SleepTimeCalculator.isTimeInBedTimeRange(bedTime) {
+            validationMessage = "자는 시간은 오후 8시부터 새벽 2시 사이에 설정해주세요."
+            showingValidationAlert = true
+            return false
+        }
+
+        // 일어나는 시간 범위
+        if !SleepTimeCalculator.isTimeInWakeTimeRange(wakeTime) {
+            validationMessage = "일어나는 시간은 새벽 3시부터 오후 2시 사이에 설정해주세요."
+            showingValidationAlert = true
+            return false
+        }
+
+        // 최소 수면 시간
+        if !SleepTimeCalculator.isValidSleepDuration(bedTime: bedTime, wakeTime: wakeTime) {
+            validationMessage = "최소 4시간 이상의 수면 시간이 필요해요."
+            showingValidationAlert = true
+            return false
+        }
+
+        return true
     }
 
     private func saveTimeSettings() {

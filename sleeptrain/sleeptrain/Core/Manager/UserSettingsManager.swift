@@ -35,6 +35,18 @@ class UserSettingsManager: ObservableObject {
     }
 
     func saveSchedule(departureTime: Date, arrivalTime: Date, context: ModelContext, userSettings: [UserSettings]) throws {
+        guard SleepTimeCalculator.isTimeInBedTimeRange(departureTime) else {
+            throw SettingsError.invalidBedTime
+        }
+
+        guard SleepTimeCalculator.isTimeInWakeTimeRange(arrivalTime) else {
+            throw SettingsError.invalidWakeTime
+        }
+
+        guard SleepTimeCalculator.isValidSleepDuration(bedTime: departureTime, wakeTime: arrivalTime) else {
+            throw SettingsError.insufficientSleepDuration
+        }
+
         let settings = getOrCreateSettings(context: context, userSettings: userSettings)
         settings.targetDepartureTime = departureTime
         settings.targetArrivalTime = arrivalTime
