@@ -21,6 +21,18 @@ struct SettingsView: View {
     @EnvironmentObject var screenTimeManager: ScreenTimeManager
     var body: some View {
         NavigationStack(path: $navigationPath) {
+            VStack(spacing: 16) {
+                HStack {
+                    Text("운행 일정")
+                        .font(.mainTitle)
+                        .foregroundColor(.white)
+                    Spacer()
+                }
+                .padding(.leading, 16)
+                .padding(.top, 16)
+                .padding(.bottom, 8)
+            }
+                
             List {
                 Section {
                     NavigationLink(value: "timeSetting") {
@@ -91,6 +103,8 @@ struct SettingsView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
+                        .padding(.vertical, 4)
+
                     }
                     .buttonStyle(.plain)
                        
@@ -110,16 +124,16 @@ struct SettingsView: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("피드백")
                                     .font(.system(size: 16, weight: .medium))
-                                    .foregroundStyle(.primary)
                                     
                                 Text("오픈채팅방 연결")
                                     .font(.system(size: 14))
-                                    .foregroundStyle(.secondary)
                             }
                                 
                             Spacer()
                         }
                         .padding(.vertical, 4)
+                        .foregroundStyle(.white)
+
                     }
                        
                 } header: {
@@ -128,8 +142,7 @@ struct SettingsView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            .navigationTitle("설정")
-            .navigationBarTitleDisplayMode(.large)
+            .scrollDisabled(true)
             .navigationDestination(for: String.self) { destination in
                 switch destination {
                 case "timeSetting":
