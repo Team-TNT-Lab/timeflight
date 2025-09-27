@@ -9,6 +9,7 @@ import Foundation
 import SwiftData
 
 final class CheckInService {
+    private let userSettingsManager = UserSettingsManager()
     func performCheckIn(at date: Date, startTimeText: String, context: ModelContext) -> CheckInResult {
         // 이미 체크인 했는지 확인
         if let today = fetchCheckIn(for: date, context: context),
@@ -44,6 +45,14 @@ final class CheckInService {
         let rec = upsertCheckIn(for: date, context: context)
         rec.status = status
         rec.checkedInAt = date
+        
+        do {
+            let userSettings = try context.fetch(FetchDescriptor<UserSettings>())
+            try userSettingsManager.updateSleepState(true, context: context, userSettings: userSettings)
+        } catch {
+            print("수면상태 저장실패: \(error)")
+        }
+        
         try? context.save()
 
         // 스트릭 계산
@@ -72,6 +81,17 @@ final class CheckInService {
 
         let isCompleted = checkIn.status == .completed || checkIn.status == .lateCompleted
         return (isCompleted, checkIn.status)
+    }
+
+    func performCheckOut(at date: Date, context: ModelContext) -> Bool {
+        do {
+            let userSettings = try context.fetch(FetchDescriptor<UserSettings>())
+            try userSettingsManager.updateSleepState(false, context: context, userSettings: userSettings)
+            return true
+        } catch {
+            print("체크아웃 저장실패: \(error)")
+            return false
+        }
     }
 
     // MARK: - Private Methods

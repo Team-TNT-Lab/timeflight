@@ -18,6 +18,10 @@ struct TransitView: View {
     
     @State private var isCheckInModeActive = false
     
+    private var isCheckedInToday: Bool {
+        return userSettings.first?.isSleeping ?? false
+    }
+    
     private var todayDateString: String {
         DateFormatting.monthDayKoreanString()
     }
@@ -43,7 +47,7 @@ struct TransitView: View {
                     .environmentObject(trainTicketViewModel)
                     .padding(.horizontal, 16)
                 
-                if !homeViewModel.hasCheckedInToday {
+                if !isCheckedInToday {
                     StreakWeekView(days: homeViewModel.weekDays)
                         .padding(.horizontal, 16)
                 }
@@ -52,7 +56,7 @@ struct TransitView: View {
                     remainingTimeText: trainTicketViewModel.remainingTimeText,
                     startTimeText: trainTicketViewModel.startTimeText,
                     endTimeText: trainTicketViewModel.endTimeText,
-                    hasCheckedInToday: homeViewModel.hasCheckedInToday,
+                    hasCheckedInToday: isCheckedInToday,
                     performCheckIn: {
                         let checkInData = CheckInData(
                             startTimeText: trainTicketViewModel.startTimeText,
@@ -65,7 +69,7 @@ struct TransitView: View {
                         homeViewModel.performCheckIn(with: checkInData)
                     },
                     performCheckOut: {
-                        homeViewModel.performCheckOut()
+                        homeViewModel.performCheckOut(context: modelContext)
                         isCheckInModeActive = false
                     },
                     isGuestUser: userSettings.first?.isGuestUser ?? true
