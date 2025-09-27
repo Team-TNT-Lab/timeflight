@@ -1,8 +1,8 @@
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 struct RecordView: View {
-    @StateObject private var homeViewModel = HomeViewModel()
+    @StateObject private var homeViewModel = TransitViewModel()
     @StateObject private var trainTicketViewModel = TrainTicketViewModel()
     @Environment(\.modelContext) private var modelContext
     
@@ -33,12 +33,9 @@ struct RecordView: View {
             }
             .scrollIndicators(.hidden)
         }
-        .background {
-            BackgroundGradientLayer()
-        }
+        .background(.mainContainerBackground)
         .onAppear {
-            homeViewModel.refreshDisplayDays()
-            // 실데이터 streak 반영
+            homeViewModel.refreshDisplayDays(context: modelContext)
             trainTicketViewModel.sleepCount = homeViewModel.getCurrentStreak(context: modelContext)
         }
     }
@@ -151,7 +148,7 @@ struct CompletedTrainTicketView: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 20)
         }
-        .background(Color.black)
+        
         .clipShape(RoundedRectangle(cornerRadius: 28))
     }
 }
@@ -200,4 +197,3 @@ private let completedSleepRecords = [
     RecordView()
         .modelContainer(for: [UserSettings.self, Stats.self], inMemory: true)
 }
-

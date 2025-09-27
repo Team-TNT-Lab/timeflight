@@ -17,6 +17,7 @@ final class UserSettings {
     var blockedApps: FamilyActivitySelection
     var isOnboardingCompleted: Bool
     var isGuestUser: Bool
+    var isSleeping: Bool = false
 
     init(
         name: String = "굿나잇",
@@ -24,7 +25,8 @@ final class UserSettings {
         targetArrivalTime: Date,
         blockedApps: FamilyActivitySelection = FamilyActivitySelection(),
         isOnboardingCompleted: Bool = false,
-        isGuestUser: Bool = true
+        isGuestUser: Bool = true,
+        isSleeping: Bool = false
     ) {
         self.name = name
         self.targetDepartureTime = targetDepartureTime
@@ -32,5 +34,6 @@ final class UserSettings {
         self.blockedApps = blockedApps
         self.isOnboardingCompleted = isOnboardingCompleted
         self.isGuestUser = isGuestUser
+        self.isSleeping = isSleeping
     }
 }
