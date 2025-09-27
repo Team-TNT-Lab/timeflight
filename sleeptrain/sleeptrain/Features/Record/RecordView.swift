@@ -2,7 +2,7 @@ import SwiftData
 import SwiftUI
 
 struct RecordView: View {
-    @StateObject private var homeViewModel = HomeViewModel()
+    @StateObject private var homeViewModel = TransitViewModel()
     @StateObject private var trainTicketViewModel = TrainTicketViewModel()
     @Environment(\.modelContext) private var modelContext
     
@@ -35,8 +35,7 @@ struct RecordView: View {
         }
         .background(.mainContainerBackground)
         .onAppear {
-            homeViewModel.refreshDisplayDays()
-            // 실데이터 streak 반영
+            homeViewModel.refreshDisplayDays(context: modelContext)
             trainTicketViewModel.sleepCount = homeViewModel.getCurrentStreak(context: modelContext)
         }
     }

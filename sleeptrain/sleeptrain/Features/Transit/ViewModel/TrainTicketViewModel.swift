@@ -1,3 +1,10 @@
+//
+//  TrainTicketViewModel.swift
+//  sleeptrain
+//
+//  Created by whatdolsa on 9/27/25.
+//
+
 import Foundation
 import SwiftUI
 
@@ -8,6 +15,7 @@ class TrainTicketViewModel: ObservableObject {
     }
     
     // MARK: - Published 프로퍼티
+
     @Published var isSleepModeActive = false
     @Published var sleepCount = 0
     @Published var startTimeText = "23:30"
@@ -22,6 +30,7 @@ class TrainTicketViewModel: ObservableObject {
     @Published private(set) var mode: Mode = .mock
     
     // MARK: - 상태 계산
+
     // 실제 스케줄(오늘 기준으로 구성된 Date)
     private var realDepartureDate: Date?
     private var realArrivalDate: Date?
@@ -37,6 +46,7 @@ class TrainTicketViewModel: ObservableObject {
     }
     
     // MARK: - 내부 계산 / 업데이트 메서드
+
     func calculateTrainPosition() -> CGFloat {
         guard let dep = realDepartureDate, let arr = realArrivalDate else { return 0 }
         let now = Date()
@@ -67,7 +77,7 @@ class TrainTicketViewModel: ObservableObject {
     private func updateRemainingTimeText(now: Date, dep: Date, arr: Date) {
         if now < dep {
             remainingTimeText = Self.remainingTimeString(until: dep)
-        } else if now >= dep && now < arr {
+        } else if now >= dep, now < arr {
             remainingTimeText = Self.delayString(since: dep)
         } else {
             remainingTimeText = "운행 종료"
@@ -108,7 +118,9 @@ class TrainTicketViewModel: ObservableObject {
     }
     
     // MARK: - 초기화 / 설정 메서드
+
     // MARK: - 실제 스케줄 적용
+
     func setRealSchedule(departureTemplate: Date, arrivalTemplate: Date) {
         let calendar = Calendar.current
         let now = Date()
@@ -141,6 +153,7 @@ class TrainTicketViewModel: ObservableObject {
     }
     
     // MARK: - 외부 static 유틸 메서드
+
     static func dayAbbrev(for date: Date) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")

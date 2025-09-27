@@ -1,18 +1,22 @@
+//
+//  TransitView.swift
+//  sleeptrain
+//
+//  Created by bishoe01 on 9/27/25.
+//
+
 import Foundation
 import SwiftData
 import SwiftUI
 
 struct TransitView: View {
-    @EnvironmentObject var authManager: AuthorizationManager
-    @EnvironmentObject var screenTimeManager: ScreenTimeManager
     @Query private var userSettings: [UserSettings]
 
     @StateObject private var trainTicketViewModel = TrainTicketViewModel()
-    @StateObject private var homeViewModel = HomeViewModel()
+    @StateObject private var homeViewModel = TransitViewModel()
     @Environment(\.modelContext) private var modelContext
     
     @State private var isCheckInModeActive = false
-    @State private var showAppUnlockToast = false
     
     private var todayDateString: String {
         DateFormatting.monthDayKoreanString()
@@ -51,14 +55,15 @@ struct TransitView: View {
                     endTimeText: trainTicketViewModel.endTimeText,
                     hasCheckedInToday: homeViewModel.hasCheckedInToday,
                     performCheckIn: {
-                        homeViewModel.performCheckIn(
-                            remainingTimeText: trainTicketViewModel.remainingTimeText,
+                        let checkInData = CheckInData(
                             startTimeText: trainTicketViewModel.startTimeText,
-                            context: modelContext
-                        ) { newSleepCount in
-                            trainTicketViewModel.sleepCount = newSleepCount
-                            isCheckInModeActive = true
-                        }
+                            context: modelContext,
+                            updateSleepCount: { newSleepCount in
+                                trainTicketViewModel.sleepCount = newSleepCount
+                                isCheckInModeActive = true
+                            }
+                        )
+                        homeViewModel.performCheckIn(with: checkInData)
                     },
                     performCheckOut: {
                         homeViewModel.performCheckOut()
@@ -67,6 +72,20 @@ struct TransitView: View {
                     isGuestUser: userSettings.first?.isGuestUser ?? true
                 )
             }
+        }
+        .onAppear {
+            homeViewModel.updateTrainState(
+                remainingTimeText: trainTicketViewModel.remainingTimeText,
+                isTrainDeparted: trainTicketViewModel.isTrainDeparted
+            )
+
+            homeViewModel.refreshDisplayDays(context: modelContext)
+        }
+        .onChange(of: trainTicketViewModel.remainingTimeText) { _, _ in
+            homeViewModel.updateTrainState(
+                remainingTimeText: trainTicketViewModel.remainingTimeText,
+                isTrainDeparted: trainTicketViewModel.isTrainDeparted
+            )
         }
     }
     
@@ -80,8 +99,8 @@ struct TransitView: View {
     // MARK: - Helpers
     
     func refreshAll() {
-        homeViewModel.refreshTodayCheckInState(context: modelContext)
-        let current = homeViewModel.getCurrentStreak(context: modelContext)
-        trainTicketViewModel.sleepCount = current
+        homeViewModel.refreshAll(context: modelContext) { currentStreak in
+            trainTicketViewModel.sleepCount = currentStreak
+        }
     }
 }

@@ -8,10 +8,6 @@ import SwiftData
 import SwiftUI
 
 struct MainContainer: View {
-    @EnvironmentObject var authManager: AuthorizationManager
-    @EnvironmentObject var screenTimeManager: ScreenTimeManager
-    @Query private var userSettings: [UserSettings]
-
     var body: some View {
         TabView {
             TransitView()
