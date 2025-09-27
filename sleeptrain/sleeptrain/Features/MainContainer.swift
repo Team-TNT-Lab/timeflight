@@ -15,10 +15,11 @@ struct MainContainer: View {
                     Label("운행", systemImage: "train.side.front.car")
                 }
 
-            RecordView()
-                .tabItem {
-                    Label("기록", systemImage: "bed.double.fill")
-                }
+            // 임시로 기록 탭 숨김
+            // RecordView()
+            //     .tabItem {
+            //         Label("기록", systemImage: "bed.double.fill")
+            //     }
 
             SettingsView()
                 .tabItem {
