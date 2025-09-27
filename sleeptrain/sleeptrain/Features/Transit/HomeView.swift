@@ -1,10 +1,10 @@
-import SwiftUI
 import Foundation
 import SwiftData
+import SwiftUI
 
-struct HomeView: View {
+struct TransitView: View {
     @EnvironmentObject var authManager: AuthorizationManager
-    @StateObject var screenTimeManager =  ScreenTimeManager()
+    @EnvironmentObject var screenTimeManager: ScreenTimeManager
     @Query private var userSettings: [UserSettings]
 
     @StateObject private var trainTicketViewModel = TrainTicketViewModel()
@@ -21,58 +21,39 @@ struct HomeView: View {
     // MARK: - View
     
     var body: some View {
-        ZStack {
-            BackgroundGradientLayer()
-                .ignoresSafeArea()
-            
-            if isCheckInModeActive {
-                mainContentSection
-            } else {
-                TabView {
-                    mainContentSection
-                        .onAppear {
-                            if !authManager.isAuthorized {
-                                authManager.requestAuthorization()
-                            }
-                            refreshAll()
-                        }
-                        .onReceive(Timer.publish(every: 60, on: .main, in: .common).autoconnect()) { _ in
-                            homeViewModel.checkAndHandleFailedState(
-                                remainingTimeText: trainTicketViewModel.remainingTimeText,
-                                startTimeText: trainTicketViewModel.startTimeText,
-                                context: modelContext
-                            ) { newSleepCount in
-                                trainTicketViewModel.sleepCount = newSleepCount
-                            }
-                            refreshAll()
-                        }
-                        .onChange(of: trainTicketViewModel.startTimeText) { _, _ in
-                            homeViewModel.refreshDisplayDays()
-                            refreshAll()
-                        }
-                        .onChange(of: trainTicketViewModel.remainingTimeText) { _, _ in
-                            refreshAll()
-                        }
-                        .background {
-                            BackgroundGradientLayer()
-                                .ignoresSafeArea()
-                        }
-                        .tabItem {
-                            Label("운행", systemImage: "train.side.front.car")
-                        }
-                    
-                    RecordView()
-                        .tabItem {
-                            Label("기록", systemImage: "bed.double.fill")
-                        }
-                    
-                    SettingsView()
-                        .tabItem {
-                            Label("설정", systemImage: "ellipsis")
-                        }
-                }
+        VStack(spacing: 16) {
+            headerSection
+                
+            TrainTicketView()
+                .environmentObject(trainTicketViewModel)
+                .padding(.horizontal, 16)
+                
+            if !homeViewModel.hasCheckedInToday {
+                streakSection
             }
-        }
+                
+            CheckInBannerView(
+                remainingTimeText: trainTicketViewModel.remainingTimeText,
+                startTimeText: trainTicketViewModel.startTimeText,
+                endTimeText: trainTicketViewModel.endTimeText,
+                hasCheckedInToday: homeViewModel.hasCheckedInToday,
+                performCheckIn: {
+                    homeViewModel.performCheckIn(
+                        remainingTimeText: trainTicketViewModel.remainingTimeText,
+                        startTimeText: trainTicketViewModel.startTimeText,
+                        context: modelContext
+                    ) { newSleepCount in
+                        trainTicketViewModel.sleepCount = newSleepCount
+                        isCheckInModeActive = true
+                    }
+                },
+                performCheckOut: {
+                    homeViewModel.performCheckOut()
+                    isCheckInModeActive = false
+                },
+                isGuestUser: userSettings.first?.isGuestUser ?? true
+            )
+        }.background(.mainContainerBackground)
     }
     
     // MARK: - Subviews
@@ -96,43 +77,6 @@ struct HomeView: View {
             StreakWeekView(days: homeViewModel.weekDays)
         }
         .padding(.horizontal, 16)
-    }
-    
-    private var mainContentSection: some View {
-        VStack(spacing: 16) {
-            headerSection
-            
-            TrainTicketView()
-                .environmentObject(trainTicketViewModel)
-                .padding(.horizontal, 16)
-            
-            if !homeViewModel.hasCheckedInToday {
-                streakSection
-            }
-            
-            CheckInBannerView(
-                remainingTimeText: trainTicketViewModel.remainingTimeText,
-                startTimeText: trainTicketViewModel.startTimeText,
-                endTimeText: trainTicketViewModel.endTimeText,
-                hasCheckedInToday: homeViewModel.hasCheckedInToday,
-                performCheckIn: {
-                    homeViewModel.performCheckIn(
-                        remainingTimeText: trainTicketViewModel.remainingTimeText,
-                        startTimeText: trainTicketViewModel.startTimeText,
-                        context: modelContext
-                    ) { newSleepCount in
-                        trainTicketViewModel.sleepCount = newSleepCount
-                        isCheckInModeActive = true
-                    }
-                },
-                performCheckOut: {
-                    homeViewModel.performCheckOut()
-                    isCheckInModeActive = false
-                },
-                isGuestUser: userSettings.first?.isGuestUser ?? true
-            )
-        }
-        // 개별 섹션에는 별도 .background를 두지 않습니다.
     }
     
     // MARK: - Helpers

@@ -5,8 +5,8 @@
 //  Created by Dean_SSONG on 9/24/25.
 //
 
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
@@ -23,12 +23,12 @@ struct SettingsView: View {
                         HStack {
                             Image(systemName: "clock")
                                 .frame(width: 24)
-                            
+                                
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("수면 시간")
                                     .font(.system(size: 16, weight: .medium))
                                     .foregroundColor(.primary)
-                                
+                                    
                                 Text(currentTimeRange)
                                     .font(.system(size: 14))
                                     .foregroundColor(.secondary)
@@ -36,18 +36,18 @@ struct SettingsView: View {
                         }
                         .padding(.vertical, 4)
                     }
-                    
+                        
                     // 앱 차단
                     NavigationLink(value: "appBlocking") {
                         HStack {
                             Image(systemName: "app.badge.checkmark")
                                 .frame(width: 24)
-                            
+                                
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("앱 차단")
                                     .font(.system(size: 16, weight: .medium))
                                     .foregroundColor(.primary)
-                                
+                                    
                                 Text("수면 시간에 차단할 앱 선택")
                                     .font(.system(size: 14))
                                     .foregroundColor(.secondary)
@@ -55,18 +55,18 @@ struct SettingsView: View {
                         }
                         .padding(.vertical, 4)
                     }
-                    
+                        
                     // 카드 관리
                     NavigationLink(value: "cardManagement") {
                         HStack {
                             Image(systemName: "creditcard")
                                 .frame(width: 24)
-                            
+                                
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("카드 관리")
                                     .font(.system(size: 16, weight: .medium))
                                     .foregroundColor(.primary)
-                                
+                                    
                                 Text("드림 카드 등록 및 삭제")
                                     .font(.system(size: 14))
                                     .foregroundColor(.secondary)
@@ -79,23 +79,23 @@ struct SettingsView: View {
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(.secondary)
                 }
-                
+                    
                 // 정보 섹션
                 Section {
                     HStack {
                         Image(systemName: "info.circle")
                             .frame(width: 24)
-                        
+                            
                         VStack(alignment: .leading, spacing: 2) {
                             Text("앱 정보")
                                 .font(.system(size: 16, weight: .medium))
                                 .foregroundColor(.primary)
-                            
+                                
                             Text("버전 1.0.0")
                                 .font(.system(size: 14))
                                 .foregroundColor(.secondary)
                         }
-                        
+                            
                         Spacer()
                     }
                     .padding(.vertical, 4)
@@ -105,6 +105,8 @@ struct SettingsView: View {
                         .foregroundColor(.secondary)
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(.mainContainerBackground)
             .navigationTitle("설정")
             .navigationBarTitleDisplayMode(.large)
             .navigationDestination(for: String.self) { destination in
@@ -123,9 +125,6 @@ struct SettingsView: View {
                     EmptyView()
                 }
             }
-        }
-        .background {
-            BackgroundGradientLayer()
         }
     }
     

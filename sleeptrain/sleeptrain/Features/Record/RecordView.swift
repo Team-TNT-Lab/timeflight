@@ -1,5 +1,5 @@
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 struct RecordView: View {
     @StateObject private var homeViewModel = HomeViewModel()
@@ -33,9 +33,7 @@ struct RecordView: View {
             }
             .scrollIndicators(.hidden)
         }
-        .background {
-            BackgroundGradientLayer()
-        }
+        .background(.mainContainerBackground)
         .onAppear {
             homeViewModel.refreshDisplayDays()
             // 실데이터 streak 반영
@@ -151,7 +149,7 @@ struct CompletedTrainTicketView: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 20)
         }
-        .background(Color.black)
+        
         .clipShape(RoundedRectangle(cornerRadius: 28))
     }
 }
@@ -200,4 +198,3 @@ private let completedSleepRecords = [
     RecordView()
         .modelContainer(for: [UserSettings.self, Stats.self], inMemory: true)
 }
-

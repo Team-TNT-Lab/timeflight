@@ -8,6 +8,18 @@
 import SwiftUI
 
 extension ShapeStyle where Self == LinearGradient {
+    static var mainContainerBackground: LinearGradient {
+        return LinearGradient(
+            gradient: Gradient(stops: [
+                .init(color: Color("maincontainer-gradient-1"), location: 0.0),
+                .init(color: Color("maincontainer-gradient-2"), location: 0.29),
+                .init(color: Color("maincontainer-gradient-3"), location: 0.99),
+            ]),
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+
     static var primaryBackground: LinearGradient {
         return LinearGradient(
             gradient: Gradient(stops: [
