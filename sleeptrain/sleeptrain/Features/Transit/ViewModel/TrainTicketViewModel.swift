@@ -14,8 +14,6 @@ class TrainTicketViewModel: ObservableObject {
         case real
     }
     
-    // MARK: - Published 프로퍼티
-
     @Published var isSleepModeActive = false
     @Published var sleepCount = 0
     @Published var progress: Double = 0.0
@@ -40,12 +38,27 @@ class TrainTicketViewModel: ObservableObject {
 
     var startDayText: String {
         guard let realDepartureDate else { return "---" }
-        return DateFormatting.dayAbbrev(for: realDepartureDate)
+        return getSleepDayText(for: realDepartureDate)
     }
 
     var endDayText: String {
         guard let realArrivalDate else { return "---" }
-        return DateFormatting.dayAbbrev(for: realArrivalDate)
+        return getSleepDayText(for: realArrivalDate)
+    }
+    
+    private func getSleepDayText(for date: Date) -> String {
+        let calendar = Calendar.current
+        let hour = calendar.component(.hour, from: date)
+        
+        let targetDate: Date
+        // 요일 계산(티켓에만 반영하기)
+        if hour < 2 {
+            targetDate = calendar.date(byAdding: .day, value: -1, to: date) ?? date
+        } else {
+            targetDate = date
+        }
+        
+        return DateFormatting.dayAbbrev(for: targetDate)
     }
     
     var targetArrivalTime: Date {
