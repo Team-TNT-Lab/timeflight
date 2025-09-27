@@ -168,15 +168,26 @@ struct TransitView: View {
     /// 어 왔니? 함수....
     private func checkIfWakeUpTimeReached() {
         guard let settings = userSettings.first,
-              settings.isSleeping else { return }
+              settings.isSleeping,
+              isCheckedInToday else { return }
         
         let now = Date()
         let calendar = Calendar.current
-                let todayWakeTime = settings.targetArrivalTime
+        let departureTime = settings.targetDepartureTime
+        let arrivalTime = settings.targetArrivalTime
         
-        let tomorrowWakeTime = calendar.date(byAdding: .day, value: 1, to: todayWakeTime) ?? todayWakeTime
+        // 수면이 다음날 기상하는 경우인지 확인
+        let isOvernightSleep = arrivalTime <= departureTime
         
-        let shouldWakeUp = now >= todayWakeTime || now >= tomorrowWakeTime
+        let shouldWakeUp: Bool
+        if isOvernightSleep {
+            // 다음날 기상: 내일 기상 시간과 비교
+            let tomorrowWakeTime = calendar.date(byAdding: .day, value: 1, to: arrivalTime) ?? arrivalTime
+            shouldWakeUp = now >= tomorrowWakeTime
+        } else {
+            // 당일 기상: 오늘 기상 시간과 비교
+            shouldWakeUp = now >= arrivalTime
+        }
         
         if shouldWakeUp {
             let currentStreak = homeViewModel.getCurrentStreak(context: modelContext)
