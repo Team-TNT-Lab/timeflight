@@ -23,7 +23,7 @@ struct SettingsView: View {
         NavigationStack(path: $navigationPath) {
             VStack(spacing: 16) {
                 HStack {
-                    Text("운행 일정")
+                    Text("설정")
                         .font(.mainTitle)
                         .foregroundColor(.white)
                     Spacer()
