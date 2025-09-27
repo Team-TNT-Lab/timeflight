@@ -15,14 +15,15 @@ struct StatusIndicatorView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(
-                getTimeMessage(
-                    status: status,
-                    targetDepartureTime: targetDepartureTime,
-                    targetArrivalTime: targetArrivalTime,
-                    currentTime: currentTime
-                )
-            )
+            Text(targetDepartureTime, style: .relative)
+//            Text(
+//                getTimeMessage(
+//                    status: status,
+//                    targetDepartureTime: targetDepartureTime,
+//                    targetArrivalTime: targetArrivalTime,
+//                    currentTime: currentTime
+//                )
+//            )
             .font(.system(size: 16, weight: .bold))
             
             Text(getStatusMessage(status: status))

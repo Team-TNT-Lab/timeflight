@@ -17,13 +17,13 @@ struct SleepTrainLiveActivitySmallView: View {
             TrainProgressBarView(
                 progress: calculateJourneyProgress(
                     from: context.state.actualDepartureTime,
-                    to: context.attributes.targetArrivalTime,
+                    to: context.state.targetArrivalTime,
                     current: context.state.currentTime
                 )
             )
             StatusIndicatorSmallView(
-                targetDepartureTime: context.attributes.targetDepartureTime,
-                targetArrivalTime: context.attributes.targetArrivalTime,
+                targetDepartureTime: context.state.targetDepartureTime,
+                targetArrivalTime: context.state.targetArrivalTime,
                 status: context.state.status,
                 currentTime: context.state.currentTime
             )
