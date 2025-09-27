@@ -47,15 +47,18 @@ struct TransitView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 16) {
-                HStack {
+                HStack(alignment: .firstTextBaseline) {
                     Text("운행 일정")
                         .font(.mainTitle)
                         .foregroundColor(.white)
                     Text(todayDateString)
                         .font(.subTitle)
                         .foregroundColor(.white.opacity(0.6))
-                    Spacer(minLength: 0)
-                }.padding(.all, 12)
+                    Spacer()
+                }
+                .padding(.leading, 16)
+                .padding(.top, 16)
+                .padding(.bottom, 8)
                 
                 TrainTicketView()
                     .environmentObject(trainTicketViewModel)
@@ -66,6 +69,8 @@ struct TransitView: View {
                         .padding(.horizontal, 16)
                 }
                 
+                Spacer()
+
                 CheckInBannerView(
                     remainingTimeText: trainTicketViewModel.remainingTimeText,
                     startTimeText: trainTicketViewModel.startTimeText,
@@ -97,6 +102,8 @@ struct TransitView: View {
                     },
                     isGuestUser: userSettings.first?.isGuestUser ?? true
                 )
+                Spacer()
+
             }
         }
         .onAppear {
