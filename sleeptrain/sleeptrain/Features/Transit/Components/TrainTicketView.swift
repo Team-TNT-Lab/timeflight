@@ -132,7 +132,7 @@ struct TrainTicketView: View {
                 Spacer()
                 
                 HStack(spacing: 8) {
-                    Image(systemName: "bed.double.badge.checkmark.fill")
+                    Image(systemName: "bed.double.fill")
                         .font(.system(size: 16))
                         .foregroundStyle(.black)
                     

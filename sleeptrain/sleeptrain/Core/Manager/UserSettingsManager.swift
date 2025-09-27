@@ -70,4 +70,10 @@ class UserSettingsManager: ObservableObject {
         settings.isGuestUser.toggle()
         try context.save()
     }
+    
+    func updateSleepState(_ isSleeping: Bool, context: ModelContext, userSettings: [UserSettings]) throws {
+        let settings = getOrCreateSettings(context: context, userSettings: userSettings)
+        settings.isSleeping = isSleeping
+        try context.save()
+    }
 }
