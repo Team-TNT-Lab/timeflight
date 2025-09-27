@@ -83,13 +83,52 @@ final class CheckInService {
         return (isCompleted, checkIn.status)
     }
 
-    func performCheckOut(at date: Date, context: ModelContext) -> Bool {
+    func wakeUp(at date: Date, context: ModelContext) -> Bool {
         do {
             let userSettings = try context.fetch(FetchDescriptor<UserSettings>())
+            
+            // 수면 상태 해제
             try userSettingsManager.updateSleepState(false, context: context, userSettings: userSettings)
+            
+            // 오늘의 DailyCheckIn을 성공 상태로 업데이트
+            if let today = fetchCheckIn(for: date, context: context) {
+                today.status = .completed
+                today.checkedInAt = date
+            }
+            
+            // 스트릭 계산 및 업데이트
+            let newStreak = computeCurrentStreak(context: context)
+            saveStreakToStats(newStreak, context: context)
+            
+            try context.save()
             return true
         } catch {
-            print("체크아웃 저장실패: \(error)")
+            print("기상 처리 실패: \(error)")
+            return false
+        }
+    }
+    
+    func performManualCheckOut(at date: Date, context: ModelContext) -> Bool {
+        do {
+            let userSettings = try context.fetch(FetchDescriptor<UserSettings>())
+            
+            // 수면 상태 해제
+            try userSettingsManager.updateSleepState(false, context: context, userSettings: userSettings)
+            
+            // 오늘의 DailyCheckIn을 실패 상태로 업데이트
+            if let today = fetchCheckIn(for: date, context: context) {
+                today.status = .failed
+                today.checkedInAt = date
+            }
+            
+            // 스트릭 계산 및 업데이트 (실패로 처리)
+            let newStreak = computeCurrentStreak(context: context)
+            saveStreakToStats(newStreak, context: context)
+            
+            try context.save()
+            return true
+        } catch {
+            print("수동 체크아웃 실패: \(error)")
             return false
         }
     }

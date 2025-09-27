@@ -17,9 +17,23 @@ struct TransitView: View {
     @Environment(\.modelContext) private var modelContext
     
     @State private var isCheckInModeActive = false
+    @State private var showSleepComplete = false
+    @State private var sleepCompleteData: (duration: String, streak: Int, isSuccessful: Bool)?
+    @State private var wakeUpTimer: Timer?
     
     private var isCheckedInToday: Bool {
         return userSettings.first?.isSleeping ?? false
+    }
+    
+    // 수면 시간 계산
+    private var sleepDuration: String {
+        guard let settings = userSettings.first else { return "0시간" }
+        let minutes = SleepTimeCalculator.calculateSleepMinutes(
+            bedTime: settings.targetDepartureTime,
+            wakeTime: settings.targetArrivalTime
+        )
+        let hours = minutes / 60
+        return "\(hours)시간"
     }
     
     private var todayDateString: String {
@@ -71,6 +85,15 @@ struct TransitView: View {
                     performCheckOut: {
                         homeViewModel.performCheckOut(context: modelContext)
                         isCheckInModeActive = false
+                        
+                        // 운행 종료 시에도 완료 화면 표시(다만 실패임)
+                        let currentStreak = homeViewModel.getCurrentStreak(context: modelContext)
+                        sleepCompleteData = (
+                            duration: sleepDuration,
+                            streak: currentStreak,
+                            isSuccessful: false
+                        )
+                        showSleepComplete = true
                     },
                     isGuestUser: userSettings.first?.isGuestUser ?? true
                 )
@@ -87,25 +110,72 @@ struct TransitView: View {
             )
 
             homeViewModel.refreshDisplayDays(context: modelContext)
+            
+            startAutoWakeUpChecker()
         }
         .onChange(of: userSettings) { _, newSettings in
             if let settings = newSettings.first {
                 trainTicketViewModel.configure(with: settings)
             }
         }
-        .onChange(of: trainTicketViewModel.remainingTimeText) { _, _ in
-            homeViewModel.updateTrainState(
-                remainingTimeText: trainTicketViewModel.remainingTimeText,
-                isTrainDeparted: trainTicketViewModel.isTrainDeparted
-            )
+        .onDisappear {
+            stopAutoWakeUpChecker()
+        }
+        .fullScreenCover(isPresented: $showSleepComplete) {
+            if let data = sleepCompleteData {
+                SleepCompleteView(
+                    sleepDuration: data.duration,
+                    streakCount: data.streak,
+                    isSuccessful: data.isSuccessful,
+                    onGoHome: {
+                        showSleepComplete = false
+                        sleepCompleteData = nil
+                    }
+                )
+            }
         }
     }
-
-    // MARK: - Helpers
     
     func refreshAll() {
         homeViewModel.refreshAll(context: modelContext) { currentStreak in
             trainTicketViewModel.sleepCount = currentStreak
+        }
+    }
+    
+    private func startAutoWakeUpChecker() {
+        wakeUpTimer?.invalidate()
+        
+        wakeUpTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in
+            checkAndAutoWakeUp()
+        }
+    }
+    
+    private func stopAutoWakeUpChecker() {
+        wakeUpTimer?.invalidate()
+        wakeUpTimer = nil
+    }
+    
+    private func checkAndAutoWakeUp() {
+        guard let settings = userSettings.first,
+              settings.isSleeping else { return }
+        
+        let now = Date()
+        let wakeTime = settings.targetArrivalTime
+        
+        if now >= wakeTime {
+            let currentStreak = homeViewModel.getCurrentStreak(context: modelContext)
+            
+            homeViewModel.wakeUp(context: modelContext)
+            
+            stopAutoWakeUpChecker()
+            
+            sleepCompleteData = (
+                duration: sleepDuration,
+                streak: currentStreak,
+                isSuccessful: true
+            )
+
+                        showSleepComplete = true
         }
     }
 }

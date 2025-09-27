@@ -40,8 +40,22 @@ final class TransitViewModel: ObservableObject {
         }
     }
 
+    func wakeUp(context: ModelContext) {
+        let success = checkInService.wakeUp(at: Date(), context: context)
+        
+        if success {
+            hasCheckedInToday = false
+            todayCheckInTime = nil
+            
+            // 주간 뷰 업데이트
+            if let todayIndex = weekDays.firstIndex(where: { dateService.isToday($0.date) }) {
+                weekDays[todayIndex] = StreakDay(date: weekDays[todayIndex].date, isCompleted: true)
+            }
+        }
+    }
+    
     func performCheckOut(context: ModelContext) {
-        let success = checkInService.performCheckOut(at: Date(), context: context)
+        let success = checkInService.performManualCheckOut(at: Date(), context: context)
         
         if success {
             hasCheckedInToday = false
