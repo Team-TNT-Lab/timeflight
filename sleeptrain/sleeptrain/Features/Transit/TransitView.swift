@@ -111,6 +111,9 @@ struct TransitView: View {
                 trainTicketViewModel.configure(with: settings)
             }
             
+            // 앱 재시작 시 기상 시간이 도달했는지 확인
+            checkIfWakeUpTimeReached()
+            
             homeViewModel.updateTrainState(
                 remainingTimeText: trainTicketViewModel.remainingTimeText,
                 isTrainDeparted: trainTicketViewModel.isTrainDeparted
@@ -160,6 +163,34 @@ struct TransitView: View {
     private func stopAutoWakeUpChecker() {
         wakeUpTimer?.invalidate()
         wakeUpTimer = nil
+    }
+    
+    /// 어 왔니? 함수....
+    private func checkIfWakeUpTimeReached() {
+        guard let settings = userSettings.first,
+              settings.isSleeping else { return }
+        
+        let now = Date()
+        let calendar = Calendar.current
+                let todayWakeTime = settings.targetArrivalTime
+        
+        let tomorrowWakeTime = calendar.date(byAdding: .day, value: 1, to: todayWakeTime) ?? todayWakeTime
+        
+        let shouldWakeUp = now >= todayWakeTime || now >= tomorrowWakeTime
+        
+        if shouldWakeUp {
+            let currentStreak = homeViewModel.getCurrentStreak(context: modelContext)
+            
+            homeViewModel.wakeUp(context: modelContext)
+            
+            sleepCompleteData = (
+                duration: sleepDuration,
+                streak: currentStreak,
+                isSuccessful: true
+            )
+            
+            showSleepComplete = true
+        }
     }
     
     private func checkAndAutoWakeUp() {
