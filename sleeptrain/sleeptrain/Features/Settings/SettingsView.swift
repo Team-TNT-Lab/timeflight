@@ -223,11 +223,14 @@ struct SettingsView: View {
     
     /// 시간에 따라 수면시간 파악해주는 함수, 나중에 옮기면 좋겠습니다!
     private func isSleepTimeRestricted() -> Bool {
-        let calendar = Calendar.current
-        let now = Date()
-        let hour = calendar.component(.hour, from: now)
+        // 디버깅을 위해 항상 false 반환 (시간 변경 허용)
+        return false
         
-        return hour >= 24 || hour <= 0
+        // 원래 로직 (주석 처리)
+        // let calendar = Calendar.current
+        // let now = Date()
+        // let hour = calendar.component(.hour, from: now)
+        // return hour >= 24 || hour <= 0
     }
 }
 
