@@ -5,6 +5,7 @@
 //  Created by Dean_SSONG on 9/24/25.
 //
 
+import FamilyControls
 import SwiftData
 import SwiftUI
 
@@ -12,7 +13,11 @@ struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var userSettings: [UserSettings]
     @State private var navigationPath = NavigationPath()
+    @State private var showFamilyPicker = false
     
+    @StateObject private var userSettingsManager = UserSettingsManager()
+    
+    @EnvironmentObject var screenTimeManager: ScreenTimeManager
     var body: some View {
         NavigationStack(path: $navigationPath) {
             List {
@@ -30,25 +35,6 @@ struct SettingsView: View {
                                     .foregroundColor(.primary)
                                     
                                 Text(currentTimeRange)
-                                    .font(.system(size: 14))
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                        .padding(.vertical, 4)
-                    }
-                        
-                    // 앱 차단
-                    NavigationLink(value: "appBlocking") {
-                        HStack {
-                            Image(systemName: "app.badge.checkmark")
-                                .frame(width: 24)
-                                
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("앱 차단")
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(.primary)
-                                    
-                                Text("수면 시간에 차단할 앱 선택")
                                     .font(.system(size: 14))
                                     .foregroundColor(.secondary)
                             }
@@ -81,26 +67,58 @@ struct SettingsView: View {
                 }
                     
                 // 정보 섹션
+                
                 Section {
-                    HStack {
-                        Image(systemName: "info.circle")
-                            .frame(width: 24)
-                            
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("앱 정보")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(.primary)
+                    Button {
+                        showFamilyPicker = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "app.badge.checkmark")
+                                .frame(width: 24)
                                 
-                            Text("버전 1.0.0")
-                                .font(.system(size: 14))
-                                .foregroundColor(.secondary)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("앱 차단")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(.primary)
+                                    
+                                Text("수면 시간에 차단할 앱 선택")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.secondary)
+                            }
                         }
-                            
-                        Spacer()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .contentShape(Rectangle())
                     }
-                    .padding(.vertical, 4)
+                    .buttonStyle(.plain)
+                       
                 } header: {
-                    Text("정보")
+                    Text("스크린타임 설정")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.secondary)
+                }
+                Section {
+                    Link(destination: URL(string: "https://open.kakao.com/o/sGslNnGc")!) {
+                        HStack {
+                            Image(systemName: "exclamationmark.bubble")
+                                .frame(width: 24)
+                                
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("피드백")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(.primary)
+                                    
+                                Text("오픈채팅방 연결")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.secondary)
+                            }
+                                
+                            Spacer()
+                        }
+                        .padding(.vertical, 4)
+                    }
+                       
+                } header: {
+                    Text("피드백")
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(.secondary)
                 }
@@ -123,6 +141,46 @@ struct SettingsView: View {
                     EmptyView()
                 }
             }
+            .sheet(isPresented: $showFamilyPicker) {
+                FamilyActivityPicker(selection: $screenTimeManager.selection)
+                    .presentationDetents([.fraction(0.85)])
+                    .presentationDragIndicator(.visible)
+                    .onAppear {
+                        loadExistingSelection()
+                    }
+                    .onDisappear {
+                        saveSelectedApps()
+                    }
+            }
+            .task {
+                await requestFamilyControlsAuthorization()
+            }
+        }
+    }
+    
+    private func requestFamilyControlsAuthorization() async {
+        do {
+            try await AuthorizationCenter.shared.requestAuthorization(for: .individual)
+        } catch {
+            print("FamilyControls authorization failed: \(error)")
+        }
+    }
+
+    private func loadExistingSelection() {
+        if let settings = userSettings.first {
+            screenTimeManager.selection = settings.blockedApps
+        }
+    }
+
+    private func saveSelectedApps() {
+        do {
+            try userSettingsManager.saveBlockedApps(
+                screenTimeManager.selection,
+                context: modelContext,
+                userSettings: userSettings
+            )
+        } catch {
+            print(error)
         }
     }
     
