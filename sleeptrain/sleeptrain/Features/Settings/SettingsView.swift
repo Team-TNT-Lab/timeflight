@@ -105,8 +105,6 @@ struct SettingsView: View {
                         .foregroundColor(.secondary)
                 }
             }
-            .scrollContentBackground(.hidden)
-            .background(.mainContainerBackground)
             .navigationTitle("설정")
             .navigationBarTitleDisplayMode(.large)
             .navigationDestination(for: String.self) { destination in
