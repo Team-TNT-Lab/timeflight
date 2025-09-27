@@ -69,13 +69,10 @@ struct SettingsView: View {
                 } header: {
                     Text("앱 설정")
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
-                // 정보 섹션
-                    
-                
-                    Button {
                 Section {
+                    Button {
                         showFamilyPicker = true
                     } label: {
                         HStack {
@@ -113,12 +110,12 @@ struct SettingsView: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("피드백")
                                     .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(.primary)
+                                    .foregroundStyle(.primary)
                                     
-                                    .foregroundColor(.secondary)
-                            }
-                                    .font(.system(size: 14))
                                 Text("오픈채팅방 연결")
+                                    .font(.system(size: 14))
+                                    .foregroundStyle(.secondary)
+                            }
                                 
                             Spacer()
                         }
@@ -128,7 +125,7 @@ struct SettingsView: View {
                 } header: {
                     Text("피드백")
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
             }
             .navigationTitle("설정")
