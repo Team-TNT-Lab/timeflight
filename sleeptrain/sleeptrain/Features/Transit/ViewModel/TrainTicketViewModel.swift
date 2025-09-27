@@ -104,7 +104,15 @@ class TrainTicketViewModel: ObservableObject {
         if now < dep {
             remainingTimeText = DateFormatting.remainingTimeString(until: dep)
         } else if now >= dep, now < arr {
-            remainingTimeText = DateFormatting.delayString(since: dep)
+            let remainingMinutes = Int(arr.timeIntervalSince(now) / 60)
+            
+            // 1분 남았을 때 업데이트 멈춤
+            if remainingMinutes <= 1 {
+                remainingTimeText = "1분"
+                return
+            } else {
+                remainingTimeText = DateFormatting.delayString(since: dep)
+            }
         } else {
             remainingTimeText = "운행 종료"
         }
@@ -123,9 +131,16 @@ class TrainTicketViewModel: ObservableObject {
                 // 체크인한 경우: 현재부터 도착까지
                 arrivalRemainingTimeText = DateFormatting.remainingTimeString(until: arr)
             }
+            
             updateRemainingTimeText(now: now, dep: dep, arr: arr)
                 
-            if now >= twoHoursAfterDeparture {
+            // 잠을 자고 있는 경우 기상 시간이 도달했으면 업데이트 멈추게
+            if hasCheckedInToday && now >= arr {
+                return
+            }
+                
+            // 잠을 자지 않는 경우 2시간이 넘으면 다음날 스케줄로 강제 업뎃
+            if !hasCheckedInToday && now >= twoHoursAfterDeparture {
                 let calendar = Calendar.current
                 let nextDep = calendar.date(byAdding: .day, value: 1, to: dep)!
                 let nextArr = calendar.date(byAdding: .day, value: 1, to: arr)!

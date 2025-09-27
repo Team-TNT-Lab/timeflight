@@ -227,7 +227,7 @@ struct SettingsView: View {
         let now = Date()
         let hour = calendar.component(.hour, from: now)
         
-        return hour >= 20 || hour <= 4
+        return hour >= 24 || hour <= 0
     }
 }
 
