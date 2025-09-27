@@ -1,28 +1,17 @@
-//
-//  HomeViewHelper.swift
-//  sleeptrain
-//
-//  Created by Dean_SSONG on 9/24/25.
-//
-
 import Foundation
 import SwiftUI
 
-// MARK: - Time Parsing
+// MARK: - 시간 파싱 및 계산
 
-/// 출발 시간 문자열을 오늘 날짜의 Date 객체로 변환
-/// - 지원 포맷: "HH:mm", "h:mma", "h:mm a" (AM/PM)
-/// - 파싱 실패 시 오늘 23:30을 반환
-public func parseDepartureTime(_ timeString: String) -> Date {
+
+internal func parseDepartureTime(_ timeString: String) -> Date {
     let calendar = Calendar.current
     let today = Date()
     
-    // 1) 먼저 "HH:mm" 시도 (기존 동작 유지)
     if let date = DateFormatting.dateFromTimeString(timeString) {
         return date
     }
     
-    // 2) AM/PM 포맷 시도
     let fmts = ["h:mma", "h:mm a"]
     for f in fmts {
         let formatter = DateFormatter()
@@ -37,13 +26,58 @@ public func parseDepartureTime(_ timeString: String) -> Date {
         }
     }
     
-    // 3) 완전 실패 시 기본값
     return calendar.date(bySettingHour: 23, minute: 30, second: 0, of: today) ?? today
 }
 
-/// 남은 시간 문자열("1시간 30분", "지연 15분" 등)을 분 단위(Int)로 변환
-/// 지연된 경우 음수 값을 반환하며, 해석 불가한 경우 nil을 반환
-func parseRemainingTimeToMinutes(_ timeString: String) -> Int? {
+/// 현재 시간부터 기상 시간까지 남은 시간 문자열 계산
+internal func calculateRemainingTimeToWakeUp(endTimeText: String) -> String {
+    let now = Date()
+    let formatter = DateFormatter()
+    formatter.dateFormat = "HH:mm"
+    
+    guard let wakeUpTimeToday = formatter.date(from: endTimeText) else {
+        return "계산 중..."
+    }
+    
+    let calendar = Calendar.current
+    let currentComponents = calendar.dateComponents([.year, .month, .day], from: now)
+    let wakeUpComponents = calendar.dateComponents([.hour, .minute], from: wakeUpTimeToday)
+    
+    var combinedComponents = DateComponents()
+    combinedComponents.year = currentComponents.year
+    combinedComponents.month = currentComponents.month
+    combinedComponents.day = currentComponents.day
+    combinedComponents.hour = wakeUpComponents.hour
+    combinedComponents.minute = wakeUpComponents.minute
+    
+    guard var wakeUpDate = calendar.date(from: combinedComponents) else {
+        return "계산 중..."
+    }
+    
+    if wakeUpDate <= now {
+        wakeUpDate = calendar.date(byAdding: .day, value: 1, to: wakeUpDate) ?? wakeUpDate
+    }
+    
+    let diff = calendar.dateComponents([.hour, .minute], from: now, to: wakeUpDate)
+    let hours = diff.hour ?? 0
+    let minutes = diff.minute ?? 0
+    
+    if hours > 0 && minutes > 0 {
+        return "\(hours)시간 \(minutes)분"
+    } else if hours > 0 {
+        return "\(hours)시간"
+    } else if minutes > 0 {
+        return "\(minutes)분"
+    } else {
+        return "곧"
+    }
+}
+
+
+// MARK: - 문자열 포맷팅
+
+/// "1시간 30분" 같은 문자열을 분 단위로 변환 (지연이면 음수)
+private func parseRemainingTimeToMinutes(_ timeString: String) -> Int? {
     let isDelayed = timeString.contains("지연")
 
     var totalMinutes = 0
@@ -83,11 +117,8 @@ func parseRemainingTimeToMinutes(_ timeString: String) -> Int? {
     return isDelayed ? -totalMinutes : totalMinutes
 }
 
-
-// MARK: - HomeView Helper Functions
-
-/// Format duration in minutes as "N시간 M분", "N시간", or "M분"
-internal func formatDuration(minutes: Int) -> String {
+/// 분 단위 시간을 "N시간 M분" 형태 문자열로 포맷
+private func formatDuration(minutes: Int) -> String {
     let m = max(0, abs(minutes))
     let h = m / 60
     let min = m % 60
@@ -100,7 +131,8 @@ internal func formatDuration(minutes: Int) -> String {
     }
 }
 
-internal func minutesUntilNextSleepTime(startTimeText: String) -> Int {
+/// 다음 수면 시간까지 남은 시간(분)
+private func minutesUntilNextSleepTime(startTimeText: String) -> Int {
     let now = Date()
     let calendar = Calendar.current
 
@@ -108,9 +140,8 @@ internal func minutesUntilNextSleepTime(startTimeText: String) -> Int {
 
     let nextStartTime: Date
     if todayStart > now {
-        nextStartTime = todayStart // 오늘 밤 수면 시간이 아직 남아 있다면
+        nextStartTime = todayStart
     } else {
-        // 오늘 시간은 이미 지났으므로, 다음 날로 이동
         nextStartTime = calendar.date(byAdding: .day, value: 1, to: todayStart) ?? todayStart
     }
 
@@ -118,7 +149,27 @@ internal func minutesUntilNextSleepTime(startTimeText: String) -> Int {
     return max(diff, 0)
 }
 
-/// Banner main text logic, extracted from HomeView
+
+// MARK: - Check-in 관련 로직
+
+/// 체크인 가능 여부 판단
+internal func canCheckIn(remainingTimeText: String, hasCheckedInToday: Bool) -> Bool {
+    guard let remainingMinutes = parseRemainingTimeToMinutes(remainingTimeText) else {
+        return false
+    }
+    
+    // 지연시간이 2시간(120분)을 넘으면 체크인 불가
+    if remainingMinutes <= -120 {
+        return false
+    }
+    
+    return (remainingMinutes <= 30 || remainingMinutes < 0) && !hasCheckedInToday
+}
+
+
+// MARK: - UI 텍스트 생성
+
+/// 현재 남은 시간 텍스트로 인포 배너 문구 생성
 internal func makeInfoBannerText(remainingTimeText: String, startTimeText: String) -> String {
     guard let remainingMinutes = parseRemainingTimeToMinutes(remainingTimeText) else {
         return "열차 출발 정보를 불러오는 중이에요"
@@ -135,8 +186,11 @@ internal func makeInfoBannerText(remainingTimeText: String, startTimeText: Strin
     }
 }
 
-/// Banner subtext logic, extracted from HomeView
-internal func makeInfoSubText(remainingTimeText: String) -> String? {
+/// 인포 서브 텍스트 생성
+internal func makeInfoSubText(remainingTimeText: String, isEmergencyStop: Bool = false) -> String? {
+    if isEmergencyStop {
+        return "좋은 하루 보내세요!"
+    }
     guard let remainingMinutes = parseRemainingTimeToMinutes(remainingTimeText) else {
         return nil
     }
@@ -155,63 +209,3 @@ internal func makeInfoSubText(remainingTimeText: String) -> String? {
         return "좋은 하루 보내세요!"
     }
 }
-
-/// Check-in eligibility logic, extracted from HomeView
-internal func canCheckIn(remainingTimeText: String, hasCheckedInToday: Bool) -> Bool {
-    guard let remainingMinutes = parseRemainingTimeToMinutes(remainingTimeText) else {
-        return false
-    }
-    
-    // 지연시간이 2시간(120분)을 넘으면 체크인 불가
-    if remainingMinutes <= -120 {
-        return false
-    }
-    
-    return (remainingMinutes <= 30 || remainingMinutes < 0) && !hasCheckedInToday
-}
-
-/// Calculate remaining time from current time to wake-up time
-internal func calculateRemainingTimeToWakeUp(endTimeText: String) -> String {
-    let now = Date()
-    let formatter = DateFormatter()
-    formatter.dateFormat = "HH:mm"
-    
-    guard let wakeUpTimeToday = formatter.date(from: endTimeText) else {
-        return "계산 중..."
-    }
-    
-    let calendar = Calendar.current
-    let currentComponents = calendar.dateComponents([.year, .month, .day], from: now)
-    let wakeUpComponents = calendar.dateComponents([.hour, .minute], from: wakeUpTimeToday)
-    
-    var combinedComponents = DateComponents()
-    combinedComponents.year = currentComponents.year
-    combinedComponents.month = currentComponents.month
-    combinedComponents.day = currentComponents.day
-    combinedComponents.hour = wakeUpComponents.hour
-    combinedComponents.minute = wakeUpComponents.minute
-    
-    guard var wakeUpDate = calendar.date(from: combinedComponents) else {
-        return "계산 중..."
-    }
-    
-    // 기상 시간이 현재 시간보다 이전이면 다음 날로 설정
-    if wakeUpDate <= now {
-        wakeUpDate = calendar.date(byAdding: .day, value: 1, to: wakeUpDate) ?? wakeUpDate
-    }
-    
-    let diff = calendar.dateComponents([.hour, .minute], from: now, to: wakeUpDate)
-    let hours = diff.hour ?? 0
-    let minutes = diff.minute ?? 0
-    
-    if hours > 0 && minutes > 0 {
-        return "\(hours)시간 \(minutes)분"
-    } else if hours > 0 {
-        return "\(hours)시간"
-    } else if minutes > 0 {
-        return "\(minutes)분"
-    } else {
-        return "곧"
-    }
-}
-

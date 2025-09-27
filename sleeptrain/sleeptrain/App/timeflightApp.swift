@@ -29,7 +29,8 @@ struct timeflightApp: App {
                 OnBoardingView(onComplete: { isOnboardingCompleted = true })
             }
         }
-        .modelContainer(for: [UserSettings.self])
+        // DailyCheckIn과 Stats를 함께 등록해야 @Query/저장이 동작합니다.
+        .modelContainer(for: [UserSettings.self, Stats.self, DailyCheckIn.self])
         .environmentObject(authManager)
         .environmentObject(screenTimeManager)
     }

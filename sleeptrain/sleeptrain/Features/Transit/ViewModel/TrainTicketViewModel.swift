@@ -1,10 +1,3 @@
-//
-//  TrainTicketViewModel.swift
-//  sleeptrain
-//
-//  Created by go on 9/26/25.
-//
-
 import Foundation
 import SwiftUI
 
@@ -14,16 +7,21 @@ class TrainTicketViewModel: ObservableObject {
         case real
     }
     
+    // MARK: - Published 프로퍼티
     @Published var isSleepModeActive = false
     @Published var sleepCount = 0
     @Published var startTimeText = "23:30"
     @Published var endTimeText = "07:30"
     @Published var startDayText = "MON"
     @Published var endDayText = "TUE"
+    @Published var progress: Double = 0.0
     @Published var remainingTimeText = "1시간"
+    @Published var hasCheckedInToday: Bool = false
+    @Published var arrivalRemainingTimeText: String = "3시간 45분"
     
     @Published private(set) var mode: Mode = .mock
     
+    // MARK: - 상태 계산
     // 실제 스케줄(오늘 기준으로 구성된 Date)
     private var realDepartureDate: Date?
     private var realArrivalDate: Date?
@@ -38,20 +36,22 @@ class TrainTicketViewModel: ObservableObject {
         return Date() >= dep
     }
     
+    // MARK: - 내부 계산 / 업데이트 메서드
     func calculateTrainPosition() -> CGFloat {
         guard let dep = realDepartureDate, let arr = realArrivalDate else { return 0 }
         let now = Date()
         
         if now < dep {
-            return 0 // 출발 전: 왼쪽
+            return 0
         } else if now >= arr {
-            return 200 // 도착 완료: 오른쪽 끝
+            return 200
         } else {
             // 출발 후 ~ 도착 전: 진행률에 따라 위치 계산
             let totalDuration = arr.timeIntervalSince(dep)
+            guard totalDuration > 0 else { return 0 }
             let elapsed = now.timeIntervalSince(dep)
             let progress = elapsed / totalDuration
-            return CGFloat(progress * 200) // 200은 진행 바의 최대 너비
+            return CGFloat(progress * 200)
         }
     }
     
@@ -64,26 +64,50 @@ class TrainTicketViewModel: ObservableObject {
         isSleepModeActive.toggle()
     }
     
+    private func updateRemainingTimeText(now: Date, dep: Date, arr: Date) {
+        if now < dep {
+            remainingTimeText = Self.remainingTimeString(until: dep)
+        } else if now >= dep && now < arr {
+            remainingTimeText = Self.delayString(since: dep)
+        } else {
+            remainingTimeText = "운행 종료"
+        }
+    }
+    
     func updateTime() {
         switch mode {
         case .mock:
-            // 목업 데이터 업데이트 비활성화
             break
         case .real:
             guard let dep = realDepartureDate, let arr = realArrivalDate else { return }
             let now = Date()
-            if now < dep {
-                remainingTimeText = Self.remainingTimeString(until: dep)
-            } else if now >= dep && now < arr {
-                // 출발 이후: 지연 시간으로 표시 (체크인/지연 로직이 음수로 해석 가능)
-                remainingTimeText = Self.delayString(since: dep)
-            } else {
-                // 운행 종료
-                remainingTimeText = "운행 종료"
+            let twoHoursAfterDeparture = dep.addingTimeInterval(2 * 60 * 60)
+
+            if hasCheckedInToday {
+                // 체크인한 경우: 현재부터 도착까지
+                arrivalRemainingTimeText = Self.remainingTimeString(until: arr)
+            }
+            updateRemainingTimeText(now: now, dep: dep, arr: arr)
+
+            if now >= twoHoursAfterDeparture {
+                let calendar = Calendar.current
+                let nextDep = calendar.date(byAdding: .day, value: 1, to: dep)!
+                let nextArr = calendar.date(byAdding: .day, value: 1, to: arr)!
+
+                realDepartureDate = nextDep
+                realArrivalDate = nextArr
+
+                startTimeText = DateFormatting.hourMinuteString(from: nextDep)
+                endTimeText = DateFormatting.hourMinuteString(from: nextArr)
+                startDayText = Self.dayAbbrev(for: nextDep)
+                endDayText = Self.dayAbbrev(for: nextArr)
+
+                remainingTimeText = Self.remainingTimeString(until: nextDep)
             }
         }
     }
     
+    // MARK: - 초기화 / 설정 메서드
     // MARK: - 실제 스케줄 적용
     func setRealSchedule(departureTemplate: Date, arrivalTemplate: Date) {
         let calendar = Calendar.current
@@ -113,16 +137,10 @@ class TrainTicketViewModel: ObservableObject {
         startDayText = Self.dayAbbrev(for: depToday)
         endDayText = Self.dayAbbrev(for: arrToday)
         
-        // 현재 시각 기준으로 남은 시간 또는 지연 시간으로 초기 세팅
-        if now < depToday {
-            remainingTimeText = Self.remainingTimeString(until: depToday)
-        } else if now >= depToday && now < arrToday {
-            remainingTimeText = Self.delayString(since: depToday)
-        } else {
-            remainingTimeText = "운행 종료"
-        }
+        updateRemainingTimeText(now: now, dep: depToday, arr: arrToday)
     }
     
+    // MARK: - 외부 static 유틸 메서드
     static func dayAbbrev(for date: Date) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")

@@ -1,56 +1,44 @@
-//
-//  DayCellView.swift
-//  sleeptrain
-//
-//  Created by Dean_SSONG on 9/24/25.
-//
-
 import SwiftUI
+import SwiftData
 
-// MARK: - 개별 요일 셀 뷰 (분리 가능)
+// MARK: - 개별 요일 셀 뷰 (실데이터 기반)
 
 /// 연속 체크인 주간 뷰에서 개별 날짜 셀을 표시
-/// 날짜 숫자와 체크인 상태 아이콘을 보여줌
-/// NOTE: 상태 계산은 전역 파서 함수(parseRemainingTimeToMinutes/parseDepartureTime)에 의존
+/// DailyCheckIn + UserSettings를 조회하여 상태 아이콘을 표시
 struct DayCellView: View {
     let day: StreakDay
-    let currentRemainingTime: String
-    let hasCheckedInToday: Bool
-    let todayCheckInTime: Date?
-    let departureTimeString: String
+    
+    @Environment(\.modelContext) private var modelContext
+    @Query private var userSettings: [UserSettings]
     
     var body: some View {
         VStack(spacing: 4) {
-            if day.date != Date.distantPast {
-                Text("\(Calendar.current.component(.day, from: day.date))")
-                    .font(.system(size: 14))
-                    .fontWeight(day.isToday ? .semibold : .regular)
-                    .foregroundColor(.white)
-            } else {
-                Text(" ")
-                    .font(.system(size: 14))
-            }
-            
-            if day.date != Date.distantPast {
-                iconView(for: status)
-            } else {
-                Spacer()
-                    .frame(width: 35, height: 35)
-            }
+            dayNumberView
+            statusIconView
         }
     }
     
-    private var status: CheckInStatus {
-        day.getCheckInStatus(
-            currentRemainingTime: currentRemainingTime,
-            hasCheckedInToday: hasCheckedInToday,
-            todayCheckInTime: todayCheckInTime,
-            departureTimeString: departureTimeString,
-            parseRemainingTime: parseRemainingTimeToMinutes,
-            parseDepartureTime: { timeString, _ in parseDepartureTime(timeString) }
-        )
+    // MARK: - 상태 계산(실데이터)
+    private var checkInStatus: CheckInStatus {
+        let daily = fetchCheckIn(for: day.date)
+        if let settings = userSettings.first {
+            return day.getCheckInStatus(daily: daily, userSettings: settings)
+        } else {
+            let template = Calendar.current.date(bySettingHour: 23, minute: 30, second: 0, of: Date()) ?? Date()
+            return day.getCheckInStatus(daily: daily, departureTemplate: template)
+        }
     }
     
+    private func fetchCheckIn(for date: Date) -> DailyCheckIn? {
+        let cal = Calendar.current
+        let start = cal.startOfDay(for: date)
+        let end = cal.date(byAdding: .day, value: 1, to: start) ?? start
+        let predicate = #Predicate<DailyCheckIn> { $0.date >= start && $0.date < end }
+        let desc = FetchDescriptor<DailyCheckIn>(predicate: predicate)
+        return (try? modelContext.fetch(desc))?.first
+    }
+    
+    // MARK: - 아이콘 뷰
     @ViewBuilder
     private func iconView(for status: CheckInStatus) -> some View {
         switch status {
@@ -94,7 +82,33 @@ struct DayCellView: View {
             Circle()
                 .fill(Color.secondary.opacity(0.4))
                 .frame(width: 35, height: 35)
+        case .noRecord:
+            Circle()
+                .fill(Color.secondary.opacity(0.4))
+                .frame(width: 35, height: 35)
+        }
+    }
+    
+    // MARK: - View Components
+    private var dayNumberView: some View {
+        if day.date != Date.distantPast {
+            return Text("\(Calendar.current.component(.day, from: day.date))")
+                .font(.system(size: 14))
+                .fontWeight(day.isToday ? .semibold : .regular)
+                .foregroundColor(.white)
+        } else {
+            return Text(" ")
+                .font(.system(size: 14))
+        }
+    }
+
+    @ViewBuilder
+    private var statusIconView: some View {
+        if day.date != Date.distantPast {
+            iconView(for: checkInStatus)
+        } else {
+            Spacer()
+                .frame(width: 35, height: 35)
         }
     }
 }
-
