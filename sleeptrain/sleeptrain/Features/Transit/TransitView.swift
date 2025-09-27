@@ -22,8 +22,6 @@ struct TransitView: View {
         DateFormatting.monthDayKoreanString()
     }
     
-    // MARK: - View
-    
     var body: some View {
         ZStack {
             Color.clear
@@ -46,7 +44,8 @@ struct TransitView: View {
                     .padding(.horizontal, 16)
                 
                 if !homeViewModel.hasCheckedInToday {
-                    streakSection
+                    StreakWeekView(days: homeViewModel.weekDays)
+                        .padding(.horizontal, 16)
                 }
                 
                 CheckInBannerView(
@@ -74,12 +73,21 @@ struct TransitView: View {
             }
         }
         .onAppear {
+            if let settings = userSettings.first {
+                trainTicketViewModel.configure(with: settings)
+            }
+            
             homeViewModel.updateTrainState(
                 remainingTimeText: trainTicketViewModel.remainingTimeText,
                 isTrainDeparted: trainTicketViewModel.isTrainDeparted
             )
 
             homeViewModel.refreshDisplayDays(context: modelContext)
+        }
+        .onChange(of: userSettings) { _, newSettings in
+            if let settings = newSettings.first {
+                trainTicketViewModel.configure(with: settings)
+            }
         }
         .onChange(of: trainTicketViewModel.remainingTimeText) { _, _ in
             homeViewModel.updateTrainState(
@@ -88,14 +96,7 @@ struct TransitView: View {
             )
         }
     }
-    
-    private var streakSection: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            StreakWeekView(days: homeViewModel.weekDays)
-        }
-        .padding(.horizontal, 16)
-    }
-    
+
     // MARK: - Helpers
     
     func refreshAll() {
